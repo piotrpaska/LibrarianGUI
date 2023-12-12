@@ -3,11 +3,15 @@ from tkinter import ttk
 import pymongo
 import yaml
 import ctypes
+import datetime
+from colorama import Fore, Back, Style
 
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 with open('config.yml', 'r') as yamlFile:
     configFile = yaml.safe_load(yamlFile)
+
+dateFormat = configFile['date_format']
 
 root = Tk()
 root.title("Librarian")
@@ -18,7 +22,7 @@ style = ttk.Style()
 style.theme_use('default')
 style.configure("Treeview",
                 background="silver",
-                foreground="black",
+
                 rowheight=45,
                 fieldbackground='silver',
                 font=('Arial, 10'))
@@ -70,6 +74,27 @@ activeCollection = db[configFile['active_rents_collection_name']]
 def viewActiveHires():
     count = 0
     for rent in activeCollection.find():
+        # Counting overdue
+        maxDateSTR = rent['maxDate']
+        if maxDateSTR != '14:10':
+            # jeśli kaucja jest wpłacona
+            today = datetime.datetime.today().date()
+            maxDate = datetime.datetime.strptime(maxDateSTR, dateFormat).date()
+            if maxDate < today:
+                difference = today - maxDate
+                overdue = f'Kara: {difference.days}zł'
+            else:
+                overdue = f'Wypożyczona'
+        else:
+            # jeśli kaucja nie została wpłacona
+            today = datetime.datetime.today().date()
+            rentalDate = datetime.datetime.strptime(rent['rentalDate'], dateFormat).date()
+            if rentalDate < today:
+                difference = today - rentalDate
+                overdue = f'Kara: {difference.days}zł'
+            else:
+                overdue = f'Wypożyczona'
+
         if count % 2 == 0:
             table.insert(parent='', index=0,
                          values=(
@@ -79,7 +104,8 @@ def viewActiveHires():
                              rent['bookTitle'],
                              rent['rentalDate'],
                              rent['maxDate'],
-                             rent['deposit']
+                             rent['deposit'],
+                             overdue
                          ), iid=count, tags=('evenrow',))
         else:
             table.insert(parent='', index=0,
@@ -90,7 +116,8 @@ def viewActiveHires():
                              rent['bookTitle'],
                              rent['rentalDate'],
                              rent['maxDate'],
-                             rent['deposit']
+                             rent['deposit'],
+                             overdue
                          ), iid=count, tags=('oddrow',))
 
         count += 1
