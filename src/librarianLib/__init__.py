@@ -4,35 +4,39 @@ from tkinter import ttk
 
 class App(Tk):
 
-    def __init__(self, viewActive, viewHistory) -> Tk:
+    def __init__(self, viewActive, viewHistory, addRent, endRent) -> Tk:
         super().__init__()
         self.title("Librarian")
         self.state('zoomed')
 
-        # Treeview style
+        ############################## STYLES #########################################
+        ### TREE STYLE ###
         treestyle = ttk.Style()
         treestyle.theme_use('default')
         treestyle.configure("Treeview",
-                        background="silver",
-
-                        rowheight=45,
-                        fieldbackground='silver',
-                        font='Arial, 10')
+                            background="gray",
+                            rowheight=45,
+                            fieldbackground='silver',
+                            font='Arial, 10')
         treestyle.map('Treeview',
-                  background=[('selected', '#4545d6')])
-
+                      background=[('selected', '#4545d6')])
+        ### BUTTON STYLE ###
         buttonStyle = ttk.Style()
         buttonStyle.theme_use('default')
         buttonStyle.configure("TButton",
-                        background="silver",
-                        font='Arial, 10',
-                        relief='flat')
+                              background="silver",
+                              font='Arial, 10',
+                              relief='flat')
 
-        # Add tree frame
+        ############################## TREE FRAME #########################################
         treeFrame = Frame(self)
-        treeFrame.grid(row=0, column=1, padx=(0, 100), sticky=E)
+        treeFrame.grid(row=0, column=1, padx=(0, 100), sticky=E, rowspan=5)
 
-        # Add tree scroll
+        ############################## TREE LABEL #########################################
+        self.treeLabel = Label(treeFrame, text='Aktywne wypożyczenia', font='Arial, 14')
+        self.treeLabel.pack(pady=20)
+
+        ############################## TREE SCROLL #########################################
         treeScroll = Scrollbar(treeFrame)
         treeScroll.pack(side=RIGHT, fill=Y)
 
@@ -96,12 +100,24 @@ class App(Tk):
 
         treeScroll.config(command=self.historyTable.yview)
 
-        # Add commands frame
+        ############################## COMMANDS FRAME #########################################
         commandsFrame = Frame(self)
         commandsFrame.grid(row=0, column=0, padx=40, sticky=W)
-        commandsFrameLabel = LabelFrame(commandsFrame, text='Commands')
-        commandsFrameLabel.pack(fill='both', expand="yes", padx=45)
-        viewActiveBtn = ttk.Button(commandsFrame, text='Aktywne wypożyczenia', command=viewActive)
-        viewHistoryBtn = ttk.Button(commandsFrame, text='Historia wypożyczeń', command=viewHistory)
+        commandsFrame['borderwidth'] = 5
+
+        ############################## COMMANDS FRAME LABEL #########################################
+        commandsFrameLabel = LabelFrame(commandsFrame, text='Commands', padx=20, pady=20)
+        commandsFrameLabel.pack(fill='both', expand="yes")
+
+        ############################## COMMANDS FRAME BUTTONS #########################################
+        ### VIEW BUTTONS ###
+        viewActiveBtn = ttk.Button(commandsFrameLabel, text='Aktywne wypożyczenia', command=viewActive)
+        viewHistoryBtn = ttk.Button(commandsFrameLabel, text='Historia wypożyczeń', command=viewHistory)
         viewActiveBtn.pack(pady=10)
         viewHistoryBtn.pack(pady=10)
+        ### ADD RENT BUTTON ###
+        addRentBtn = ttk.Button(commandsFrameLabel, text='Dodaj wypożyczenie', command=addRent)
+        addRentBtn.pack(pady=10)
+        ### END RENT BUTTON ###
+        endRentBtn = ttk.Button(commandsFrameLabel, text='Zakończ wypożyczenie', command=endRent)
+        endRentBtn.pack(pady=10)

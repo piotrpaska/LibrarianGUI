@@ -20,8 +20,10 @@ historyCollection = db[configFile['history_rents_collection_name']]
 
 def viewActiveRents():
     app.historyTable.pack_forget()
-    app.activeTable.pack()
+    app.activeTable.pack(anchor=E)
     app.activeTable.delete(*app.activeTable.get_children())
+
+    app.treeLabel.config(text='Aktywne wypożyczenia')
 
     count = 0
     for rent in activeCollection.find():
@@ -76,8 +78,10 @@ def viewActiveRents():
 
 def viewHistoryRents():
     app.activeTable.pack_forget()
-    app.historyTable.pack()
+    app.historyTable.pack(anchor=E)
     app.historyTable.delete(*app.historyTable.get_children())
+
+    app.treeLabel.config(text='Historia wypożyczeń')
 
     count = 0
     for rent in historyCollection.find():
@@ -109,7 +113,18 @@ def viewHistoryRents():
         count += 1
 
 
-app = App(viewActive=viewActiveRents, viewHistory=viewHistoryRents)
+def addRent():
+    pass
+
+
+def endRent():
+    pass
+
+
+app = App(viewActive=viewActiveRents,
+          viewHistory=viewHistoryRents,
+          addRent=addRent,
+          endRent=endRent)
 
 if __name__ == '__main__':
     viewActiveRents()
