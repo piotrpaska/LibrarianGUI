@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 
 
 class App(Tk):
@@ -121,3 +122,71 @@ class App(Tk):
         ### END RENT BUTTON ###
         endRentBtn = ttk.Button(commandsFrameLabel, text='Zakończ wypożyczenie', command=endRent)
         endRentBtn.pack(pady=10)
+
+    def addRent(self):
+
+        global data
+
+        def getData():
+            name = nameEntry.get()
+            lastName = lastNameEntry.get()
+            schoolClass = schoolClassEntry.get()
+            bookTitle = bookTitleEntry.get()
+            deposit = depositEntry.get()
+
+            global data
+            data = {"name": name,
+                    "lastName": lastName, "schoolClass": schoolClass, "bookTitle": bookTitle, "deposit": deposit}
+
+            messagebox.showinfo('Dodano wypożyczenie', 'Dodano wypożyczenie'),
+            window.destroy()
+
+            return data
+
+        window = Toplevel(self)
+        window.title('Dodaj wypożyczenie')
+
+        ### MAIN FRAME ###
+        mainFrame = Frame(window)
+        mainFrame.pack()
+
+        ### RENT LABEL ###
+        addRentLabel = LabelFrame(mainFrame, text='Dodawanie wypożyczenia', font='Arial, 9')
+        addRentLabel.grid(row=0, column=0, padx=20, pady=20)
+
+        ### NAME ###
+        nameLabel = Label(addRentLabel, text='Imię')
+        nameLabel.grid(row=0, column=0)
+        nameEntry = Entry(addRentLabel)
+        nameEntry.grid(row=1, column=0, padx=20)
+
+        ### LAST NAME ###
+        lastNameLabel = Label(addRentLabel, text='Nazwisko')
+        lastNameLabel.grid(row=0, column=1)
+        lastNameEntry = Entry(addRentLabel)
+        lastNameEntry.grid(row=1, column=1, padx=20)
+
+        ### SCHOOL CLASS ###
+        schoolClassLabel = Label(addRentLabel, text='Klasa')
+        schoolClassLabel.grid(row=0, column=2)
+        schoolClassEntry = Entry(addRentLabel)
+        schoolClassEntry.grid(row=1, column=2)
+
+        ### BOOK TITLE ###
+        bookTitleLabel = Label(addRentLabel, text='Tytuł książki')
+        bookTitleLabel.grid(row=2, column=0)
+        bookTitleEntry = Entry(addRentLabel)
+        bookTitleEntry.grid(row=3, column=0, padx=20, pady=(0, 20))
+
+        ### DEPOSIT ###
+        depositLabel = Label(addRentLabel, text='Kaucja')
+        depositLabel.grid(row=2, column=1)
+        depositEntry = Entry(addRentLabel)
+        depositEntry.grid(row=3, column=1, padx=20, pady=(0, 20))
+
+        ### SUBMIT BUTTON ###
+        sumbitBtn = ttk.Button(addRentLabel, text='Zatwierdź', command=getData)
+        sumbitBtn.grid(row=2, column=2, pady=20, rowspan=2)
+
+        window.wait_window()
+        return data

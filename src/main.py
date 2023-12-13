@@ -114,7 +114,7 @@ def viewHistoryRents():
 
 
 def addRent():
-    pass
+    print(app.addRent())
 
 
 def endRent():
