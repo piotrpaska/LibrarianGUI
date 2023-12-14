@@ -117,13 +117,14 @@ def addRent():
     rentData = app.addRent()
     if rentData is not None:
         rentData['rentalDate'] = str(datetime.datetime.today().strftime(dateFormat))
-        if app.isDepositDisabled.get() is True:
+        if app.isDepositEnabled.get() is True:
             rentData['maxDate'] = str((datetime.datetime.today() + datetime.timedelta(weeks=2)).strftime(dateFormat))
         else:
             rentData['maxDate'] = '14:10'
-            rentData['deposit'] = 'Brak'
         print(rentData)
         activeCollection.insert_one(rentData)
+
+    viewActiveRents()
 
 
 def endRent():

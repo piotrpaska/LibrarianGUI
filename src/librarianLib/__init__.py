@@ -129,21 +129,26 @@ class App(Tk):
         data = None
 
         def getData():
+            global data, deposit
+
             name = nameEntry.get()
             lastName = lastNameEntry.get()
             schoolClass = schoolClassEntry.get()
             bookTitle = bookTitleEntry.get()
 
             isValid = False
-            try:
-                deposit = int(depositEntry.get())
+            if self.isDepositEnabled.get() is True:
+                try:
+                    deposit = int(depositEntry.get())
+                    isValid = True
+                except ValueError:
+                    messagebox.showwarning('Błąd', 'Kaucja musi być liczbą!')
+                    isValid = False
+            else:
                 isValid = True
-            except ValueError:
-                messagebox.showwarning('Błąd', 'Kaucja musi być liczbą!')
-                isValid = False
+                deposit = 'Brak'
 
             if isValid is True:
-                global data
                 data = {"name": name,
                         "lastName": lastName, "schoolClass": schoolClass, "bookTitle": bookTitle, "deposit": deposit}
 
@@ -188,7 +193,7 @@ class App(Tk):
 
         ### DEPOSIT ###
         def depositUsed():
-            if self.isDepositDisabled.get() is True:
+            if self.isDepositEnabled.get() is True:
                 depositEntry.config(state='normal')
             else:
                 depositEntry.config(state='disabled')
@@ -199,10 +204,10 @@ class App(Tk):
         depositEntry.grid(row=6, column=0, padx=20, pady=(0, 20))
         depositEntry.config(state='disabled')
 
-        self.isDepositDisabled = BooleanVar()
-        self.isDepositDisabled.set(False)
+        self.isDepositEnabled = BooleanVar()
+        self.isDepositEnabled.set(False)
         depositCheckbox = Checkbutton(addRentLabel, text='Wypożyczenie z kaucją?', onvalue=True, offvalue=False,
-                                      command=lambda: depositUsed(), variable=self.isDepositDisabled)
+                                      command=lambda: depositUsed(), variable=self.isDepositEnabled)
         depositCheckbox.grid(row=4, column=0)
 
         ### SUBMIT BUTTON ###
