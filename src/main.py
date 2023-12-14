@@ -59,7 +59,7 @@ def viewActiveRents():
                                        rent['maxDate'],
                                        rent['deposit'],
                                        overdue
-                                   ), iid=count, tags=('evenrow',))
+                                   ), iid=rent['_id'], tags=('evenrow',))
         else:
             app.activeTable.insert(parent='', index=0,
                                    values=(
@@ -71,7 +71,7 @@ def viewActiveRents():
                                        rent['maxDate'],
                                        rent['deposit'],
                                        overdue
-                                   ), iid=count, tags=('oddrow',))
+                                   ), iid=rent['_id'], tags=('oddrow',))
 
         count += 1
 
@@ -87,28 +87,28 @@ def viewHistoryRents():
     for rent in historyCollection.find():
         if count % 2 == 0:
             app.historyTable.insert(parent='', index=0,
-                                   values=(
-                                       rent['name'],
-                                       rent['lastName'],
-                                       rent['schoolClass'],
-                                       rent['bookTitle'],
-                                       rent['rentalDate'],
-                                       rent['maxDate'],
-                                       rent['returnDate'],
-                                       rent['deposit'],
-                                   ), iid=count, tags=('evenrow',))
+                                    values=(
+                                        rent['name'],
+                                        rent['lastName'],
+                                        rent['schoolClass'],
+                                        rent['bookTitle'],
+                                        rent['rentalDate'],
+                                        rent['maxDate'],
+                                        rent['returnDate'],
+                                        rent['deposit'],
+                                    ), iid=rent['_id'], tags=('evenrow',))
         else:
             app.historyTable.insert(parent='', index=0,
-                                   values=(
-                                       rent['name'],
-                                       rent['lastName'],
-                                       rent['schoolClass'],
-                                       rent['bookTitle'],
-                                       rent['rentalDate'],
-                                       rent['maxDate'],
-                                       rent['returnDate'],
-                                       rent['deposit'],
-                                   ), iid=count, tags=('oddrow',))
+                                    values=(
+                                        rent['name'],
+                                        rent['lastName'],
+                                        rent['schoolClass'],
+                                        rent['bookTitle'],
+                                        rent['rentalDate'],
+                                        rent['maxDate'],
+                                        rent['returnDate'],
+                                        rent['deposit'],
+                                    ), iid=rent['_id'], tags=('oddrow',))
 
         count += 1
 
@@ -135,6 +135,15 @@ app = App(viewActive=viewActiveRents,
           viewHistory=viewHistoryRents,
           addRent=addRent,
           endRent=endRent)
+
+def itemSelect(_):
+    global app
+    print(app.activeTable.selection())
+    for i in app.activeTable.selection():
+        print(app.activeTable.item(i))
+
+
+app.activeTable.bind('<<TreeviewSelect>>', itemSelect)
 
 if __name__ == '__main__':
     viewActiveRents()
