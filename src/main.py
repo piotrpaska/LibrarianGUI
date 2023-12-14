@@ -122,6 +122,7 @@ def addRent():
         else:
             rentData['maxDate'] = '14:10'
         print(rentData)
+        activeCollection.insert_one(rentData)
 
 
 def endRent():
