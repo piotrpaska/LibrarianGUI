@@ -121,6 +121,7 @@ def addRent():
             rentData['maxDate'] = str((datetime.datetime.today() + datetime.timedelta(weeks=2)).strftime(dateFormat))
         else:
             rentData['maxDate'] = '14:10'
+            rentData['deposit'] = 'Brak'
         print(rentData)
         activeCollection.insert_one(rentData)
 

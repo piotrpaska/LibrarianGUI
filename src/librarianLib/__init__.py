@@ -133,19 +133,26 @@ class App(Tk):
             lastName = lastNameEntry.get()
             schoolClass = schoolClassEntry.get()
             bookTitle = bookTitleEntry.get()
-            deposit = depositEntry.get()
 
-            global data
-            data = {"name": name,
-                    "lastName": lastName, "schoolClass": schoolClass, "bookTitle": bookTitle, "deposit": deposit}
+            isValid = False
+            try:
+                deposit = int(depositEntry.get())
+                isValid = True
+            except ValueError:
+                messagebox.showwarning('Błąd', 'Kaucja musi być liczbą!')
+                isValid = False
 
-            messagebox.showinfo('Dodano wypożyczenie', 'Dodano wypożyczenie'),
-            window.destroy()
+            if isValid is True:
+                global data
+                data = {"name": name,
+                        "lastName": lastName, "schoolClass": schoolClass, "bookTitle": bookTitle, "deposit": deposit}
 
-            return data
+                messagebox.showinfo('Dodano wypożyczenie', 'Dodano wypożyczenie'),
+                window.destroy()
 
         window = Toplevel(self)
         window.title('Dodaj wypożyczenie')
+        window.grab_set()
 
         ### MAIN FRAME ###
         mainFrame = Frame(window)
