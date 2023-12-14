@@ -126,6 +126,7 @@ class App(Tk):
     def addRent(self):
 
         global data
+        data = None
 
         def getData():
             name = nameEntry.get()
@@ -170,7 +171,7 @@ class App(Tk):
         schoolClassLabel = Label(addRentLabel, text='Klasa')
         schoolClassLabel.grid(row=0, column=2)
         schoolClassEntry = Entry(addRentLabel)
-        schoolClassEntry.grid(row=1, column=2)
+        schoolClassEntry.grid(row=1, column=2, padx=20)
 
         ### BOOK TITLE ###
         bookTitleLabel = Label(addRentLabel, text='Tytuł książki')
@@ -179,14 +180,28 @@ class App(Tk):
         bookTitleEntry.grid(row=3, column=0, padx=20, pady=(0, 20))
 
         ### DEPOSIT ###
+        def depositUsed():
+            if self.isDepositDisabled.get() is True:
+                depositEntry.config(state='normal')
+            else:
+                depositEntry.config(state='disabled')
+
         depositLabel = Label(addRentLabel, text='Kaucja')
-        depositLabel.grid(row=2, column=1)
+        depositLabel.grid(row=5, column=0)
         depositEntry = Entry(addRentLabel)
-        depositEntry.grid(row=3, column=1, padx=20, pady=(0, 20))
+        depositEntry.grid(row=6, column=0, padx=20, pady=(0, 20))
+        depositEntry.config(state='disabled')
+
+        self.isDepositDisabled = BooleanVar()
+        self.isDepositDisabled.set(False)
+        depositCheckbox = Checkbutton(addRentLabel, text='Wypożyczenie z kaucją?', onvalue=True, offvalue=False,
+                                      command=lambda: depositUsed(), variable=self.isDepositDisabled)
+        depositCheckbox.grid(row=4, column=0)
 
         ### SUBMIT BUTTON ###
         sumbitBtn = ttk.Button(addRentLabel, text='Zatwierdź', command=getData)
-        sumbitBtn.grid(row=2, column=2, pady=20, rowspan=2)
+        sumbitBtn.grid(row=5, column=2, pady=20, rowspan=2)
 
         window.wait_window()
-        return data
+        if data is not None:
+            return data

@@ -114,7 +114,14 @@ def viewHistoryRents():
 
 
 def addRent():
-    print(app.addRent())
+    rentData = app.addRent()
+    if rentData is not None:
+        rentData['rentalDate'] = str(datetime.datetime.today().strftime(dateFormat))
+        if app.isDepositDisabled.get() is True:
+            rentData['maxDate'] = str((datetime.datetime.today() + datetime.timedelta(weeks=2)).strftime(dateFormat))
+        else:
+            rentData['maxDate'] = '14:10'
+        print(rentData)
 
 
 def endRent():
