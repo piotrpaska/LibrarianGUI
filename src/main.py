@@ -3,6 +3,7 @@ import pymongo
 import yaml
 import ctypes
 import datetime
+from bson.objectid import ObjectId
 
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
@@ -128,22 +129,22 @@ def addRent():
 
 
 def endRent():
-    pass
+    global app
+    selected = app.activeTable.selection()
+    if len(selected) != 0:
+        for i in selected:
+            rent = activeCollection.find_one({"_id": ObjectId(i)})
+            rent['returnDate'] = str(datetime.datetime.today().strftime(dateFormat))
+            historyCollection.insert_one(rent)
+            activeCollection.delete_one({'_id': ObjectId(i)})
+    else:
+        messagebox.showerror('Błąd', 'Nie wybrano żadnego wypożyczenia')
 
 
 app = App(viewActive=viewActiveRents,
           viewHistory=viewHistoryRents,
           addRent=addRent,
           endRent=endRent)
-
-def itemSelect(_):
-    global app
-    print(app.activeTable.selection())
-    for i in app.activeTable.selection():
-        print(app.activeTable.item(i))
-
-
-app.activeTable.bind('<<TreeviewSelect>>', itemSelect)
 
 if __name__ == '__main__':
     viewActiveRents()
