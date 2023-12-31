@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from typing import Self
 
 
 class App(Tk):
@@ -9,6 +10,8 @@ class App(Tk):
         super().__init__()
         self.title("Librarian")
         self.state('zoomed')
+
+        self.rentData = {}
 
         ############################## STYLES #########################################
         ### TREE STYLE ###
@@ -30,19 +33,19 @@ class App(Tk):
                               relief='flat')
 
         ############################## TREE FRAME #########################################
-        treeFrame = Frame(self)
-        treeFrame.grid(row=0, column=1, padx=(0, 100), sticky=E, rowspan=5)
+        self.treeFrame = Frame(self)
+        self.treeFrame.grid(row=0, column=1, padx=(0, 100), sticky=E, rowspan=5)
 
         ############################## TREE LABEL #########################################
-        self.treeLabel = Label(treeFrame, text='Aktywne wypożyczenia', font='Arial, 14')
+        self.treeLabel = Label(self.treeFrame, text='Aktywne wypożyczenia', font='Arial, 14')
         self.treeLabel.pack(pady=20)
 
         ############################## TREE SCROLL #########################################
-        treeScroll = Scrollbar(treeFrame)
-        treeScroll.pack(side=RIGHT, fill=Y)
+        self.treeScroll = Scrollbar(self.treeFrame)
+        self.treeScroll.pack(side=RIGHT, fill=Y)
 
         ############################## ACTIVE TABLE #########################################
-        self.activeTable = ttk.Treeview(treeFrame, yscrollcommand=treeScroll.set, selectmode='extended',
+        self.activeTable = ttk.Treeview(self.treeFrame, yscrollcommand=self.treeScroll.set, selectmode='extended',
                                         columns=('name', 'lastName', 'schoolClass', 'bookTitle', 'rentalDate',
                                                  'maxDate', 'deposit', 'state'),
                                         show='headings')
@@ -69,10 +72,10 @@ class App(Tk):
         self.activeTable.tag_configure('oddrow', background='white')
         self.activeTable.tag_configure('evenrow', background='lightblue')
 
-        treeScroll.config(command=self.activeTable.yview)
+        self.treeScroll.config(command=self.activeTable.yview)
 
         ############################## HISTORY TABLE #########################################
-        self.historyTable = ttk.Treeview(treeFrame, yscrollcommand=treeScroll.set, selectmode='extended',
+        self.historyTable = ttk.Treeview(self.treeFrame, yscrollcommand=self.treeScroll.set, selectmode='extended',
                                          columns=('name', 'lastName', 'schoolClass', 'bookTitle', 'rentalDate',
                                                   'maxDate', 'returnDate', 'deposit'),
                                          show='headings')
@@ -99,121 +102,122 @@ class App(Tk):
         self.historyTable.tag_configure('oddrow', background='white')
         self.historyTable.tag_configure('evenrow', background='lightblue')
 
-        treeScroll.config(command=self.historyTable.yview)
+        self.treeScroll.config(command=self.historyTable.yview)
 
         ############################## COMMANDS FRAME #########################################
-        commandsFrame = Frame(self)
-        commandsFrame.grid(row=0, column=0, padx=40, sticky=W)
-        commandsFrame['borderwidth'] = 5
+        self.commandsFrame = Frame(self)
+        self.commandsFrame.grid(row=0, column=0, padx=40, sticky=W)
+        self.commandsFrame['borderwidth'] = 5
 
         ############################## COMMANDS FRAME LABEL #########################################
-        commandsFrameLabel = LabelFrame(commandsFrame, text='Commands', padx=20, pady=20)
-        commandsFrameLabel.pack(fill='both', expand="yes")
+        self.commandsFrameLabel = LabelFrame(self.commandsFrame, text='Commands', padx=20, pady=20)
+        self.commandsFrameLabel.pack(fill='both', expand="yes")
 
         ############################## COMMANDS FRAME BUTTONS #########################################
         ### VIEW BUTTONS ###
-        viewActiveBtn = ttk.Button(commandsFrameLabel, text='Aktywne wypożyczenia', command=viewActive)
-        viewHistoryBtn = ttk.Button(commandsFrameLabel, text='Historia wypożyczeń', command=viewHistory)
-        viewActiveBtn.pack(pady=10)
-        viewHistoryBtn.pack(pady=10)
+        self.viewActiveBtn = ttk.Button(self.commandsFrameLabel, text='Aktywne wypożyczenia', command=viewActive)
+        self.viewHistoryBtn = ttk.Button(self.commandsFrameLabel, text='Historia wypożyczeń', command=viewHistory)
+        self.viewActiveBtn.pack(pady=10)
+        self.viewHistoryBtn.pack(pady=10)
         ### ADD RENT BUTTON ###
-        addRentBtn = ttk.Button(commandsFrameLabel, text='Dodaj wypożyczenie', command=addRent)
-        addRentBtn.pack(pady=10)
+        self.addRentBtn = ttk.Button(self.commandsFrameLabel, text='Dodaj wypożyczenie', command=addRent)
+        self.addRentBtn.pack(pady=10)
         ### END RENT BUTTON ###
-        endRentBtn = ttk.Button(commandsFrameLabel, text='Zakończ wypożyczenie', command=endRent)
-        endRentBtn.pack(pady=10)
+        self.endRentBtn = ttk.Button(self.commandsFrameLabel, text='Zakończ wypożyczenie', command=endRent)
+        self.endRentBtn.pack(pady=10)
 
-    def addRent(self):
 
-        global data
-        data = None
+class AddRentWindow():
 
-        def getData():
-            global data, deposit
-
-            name = nameEntry.get()
-            lastName = lastNameEntry.get()
-            schoolClass = schoolClassEntry.get()
-            bookTitle = bookTitleEntry.get()
-
-            isValid = False
-            if self.isDepositEnabled.get() is True:
-                try:
-                    deposit = int(depositEntry.get())
-                    isValid = True
-                except ValueError:
-                    messagebox.showwarning('Błąd', 'Kaucja musi być liczbą!')
-                    isValid = False
-            else:
-                isValid = True
-                deposit = 'Brak'
-
-            if isValid is True:
-                data = {"name": name,
-                        "lastName": lastName, "schoolClass": schoolClass, "bookTitle": bookTitle, "deposit": deposit}
-
-                messagebox.showinfo('Dodano wypożyczenie', 'Dodano wypożyczenie'),
-                window.destroy()
-
-        window = Toplevel(self)
-        window.title('Dodaj wypożyczenie')
-        window.grab_set()
+    def __init__(self, root: Tk):
+        self.top = Toplevel(root)
+        self.top.title('Dodaj wypożyczenie')
+        self.top.grab_set()
 
         ### MAIN FRAME ###
-        mainFrame = Frame(window)
-        mainFrame.pack()
+        self.mainFrame = Frame(self.top)
+        self.mainFrame.pack()
 
         ### RENT LABEL ###
-        addRentLabel = LabelFrame(mainFrame, text='Dodawanie wypożyczenia', font='Arial, 9')
-        addRentLabel.grid(row=0, column=0, padx=20, pady=20)
+        self.addRentLabel = LabelFrame(self.mainFrame, text='Dodawanie wypożyczenia', font='Arial, 9')
+        self.addRentLabel.grid(row=0, column=0, padx=20, pady=20)
 
         ### NAME ###
-        nameLabel = Label(addRentLabel, text='Imię')
-        nameLabel.grid(row=0, column=0)
-        nameEntry = Entry(addRentLabel)
-        nameEntry.grid(row=1, column=0, padx=20)
+        self.nameLabel = Label(self.addRentLabel, text='Imię')
+        self.nameLabel.grid(row=0, column=0)
+        self.nameEntry = Entry(self.addRentLabel)
+        self.nameEntry.grid(row=1, column=0, padx=20)
 
         ### LAST NAME ###
-        lastNameLabel = Label(addRentLabel, text='Nazwisko')
-        lastNameLabel.grid(row=0, column=1)
-        lastNameEntry = Entry(addRentLabel)
-        lastNameEntry.grid(row=1, column=1, padx=20)
+        self.lastNameLabel = Label(self.addRentLabel, text='Nazwisko')
+        self.lastNameLabel.grid(row=0, column=1)
+        self.lastNameEntry = Entry(self.addRentLabel)
+        self.lastNameEntry.grid(row=1, column=1, padx=20)
 
         ### SCHOOL CLASS ###
-        schoolClassLabel = Label(addRentLabel, text='Klasa')
-        schoolClassLabel.grid(row=0, column=2)
-        schoolClassEntry = Entry(addRentLabel)
-        schoolClassEntry.grid(row=1, column=2, padx=20)
+        self.schoolClassLabel = Label(self.addRentLabel, text='Klasa')
+        self.schoolClassLabel.grid(row=0, column=2)
+        self.schoolClassEntry = Entry(self.addRentLabel)
+        self.schoolClassEntry.grid(row=1, column=2, padx=20)
 
         ### BOOK TITLE ###
-        bookTitleLabel = Label(addRentLabel, text='Tytuł książki')
-        bookTitleLabel.grid(row=2, column=0)
-        bookTitleEntry = Entry(addRentLabel)
-        bookTitleEntry.grid(row=3, column=0, padx=20, pady=(0, 20))
+        self.bookTitleLabel = Label(self.addRentLabel, text='Tytuł książki')
+        self.bookTitleLabel.grid(row=2, column=0)
+        self.bookTitleEntry = Entry(self.addRentLabel)
+        self.bookTitleEntry.grid(row=3, column=0, padx=20, pady=(0, 20))
 
         ### DEPOSIT ###
         def depositUsed():
             if self.isDepositEnabled.get() is True:
-                depositEntry.config(state='normal')
+                self.depositEntry.config(state='normal')
             else:
-                depositEntry.config(state='disabled')
+                self.depositEntry.config(state='disabled')
 
-        depositLabel = Label(addRentLabel, text='Kaucja')
-        depositLabel.grid(row=5, column=0)
-        depositEntry = Entry(addRentLabel)
-        depositEntry.grid(row=6, column=0, padx=20, pady=(0, 20))
-        depositEntry.config(state='disabled')
+        self.depositLabel = Label(self.addRentLabel, text='Kaucja')
+        self.depositLabel.grid(row=5, column=0)
+        self.depositEntry = Entry(self.addRentLabel)
+        self.depositEntry.grid(row=6, column=0, padx=20, pady=(0, 20))
+        self.depositEntry.config(state='disabled')
 
         self.isDepositEnabled = BooleanVar()
         self.isDepositEnabled.set(False)
-        depositCheckbox = Checkbutton(addRentLabel, text='Wypożyczenie z kaucją?', onvalue=True, offvalue=False,
+        self.depositCheckbox = Checkbutton(self.addRentLabel, text='Wypożyczenie z kaucją?', onvalue=True, offvalue=False,
                                       command=lambda: depositUsed(), variable=self.isDepositEnabled)
-        depositCheckbox.grid(row=4, column=0)
+        self.depositCheckbox.grid(row=4, column=0)
 
         ### SUBMIT BUTTON ###
-        sumbitBtn = ttk.Button(addRentLabel, text='Zatwierdź', command=getData)
-        sumbitBtn.grid(row=5, column=2, pady=20, rowspan=2)
+        self.sumbitBtn = ttk.Button(self.addRentLabel, text='Zatwierdź', command=self.getData)
+        self.sumbitBtn.grid(row=5, column=2, pady=20, rowspan=2)
 
-        window.wait_window()
-        if data is not None:
-            return data
+
+
+    def getData(self):
+        global deposit
+
+        name = self.nameEntry.get()
+        lastName = self.lastNameEntry.get()
+        schoolClass = self.schoolClassEntry.get()
+        bookTitle = self.bookTitleEntry.get()
+
+        isValid = False
+        if self.isDepositEnabled.get() is True:
+            try:
+                deposit = int(self.depositEntry.get())
+                isValid = True
+            except ValueError:
+                messagebox.showwarning('Błąd', 'Kaucja musi być liczbą!')
+                isValid = False
+        else:
+            isValid = True
+            deposit = 'Brak'
+
+        if isValid is True:
+            self.rentData = {"name": name,
+                    "lastName": lastName, "schoolClass": schoolClass, "bookTitle": bookTitle, "deposit": deposit}
+
+            messagebox.showinfo('Dodano wypożyczenie', 'Dodano wypożyczenie')
+            self.top.destroy()
+
+    def returnData(self):
+        return self.rentData
+        

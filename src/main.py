@@ -1,18 +1,21 @@
 from librarianLib import *
+import librarianLib
 import pymongo
 import yaml
 import ctypes
 import datetime
 from bson.objectid import ObjectId
 
+# Fixing blurry text on Windows
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
+################# CONFIG FROM YAML #################
 with open('config.yml', 'r') as yamlFile:
     configFile = yaml.safe_load(yamlFile)
 
 dateFormat = configFile['date_format']
 
-# Connect to mongo
+################# MONGODB CONNECTION #################
 client = pymongo.MongoClient(configFile['mongodb_connection_string'])
 db = client[configFile['mongo_rents_db_name']]
 activeCollection = db[configFile['active_rents_collection_name']]
@@ -115,10 +118,12 @@ def viewHistoryRents():
 
 
 def addRent():
-    rentData = app.addRent()
+    rentWindow = AddRentWindow(app)
+    rentWindow.top.wait_window()
+    rentData = rentWindow.returnData()
     if rentData is not None:
         rentData['rentalDate'] = str(datetime.datetime.today().strftime(dateFormat))
-        if app.isDepositEnabled.get() is True:
+        if rentWindow.isDepositEnabled.get() is True:
             rentData['maxDate'] = str((datetime.datetime.today() + datetime.timedelta(weeks=2)).strftime(dateFormat))
         else:
             rentData['maxDate'] = '14:10'
@@ -126,6 +131,7 @@ def addRent():
         activeCollection.insert_one(rentData)
 
     viewActiveRents()
+    del rentWindow
 
 
 def endRent():
@@ -137,6 +143,8 @@ def endRent():
             rent['returnDate'] = str(datetime.datetime.today().strftime(dateFormat))
             historyCollection.insert_one(rent)
             activeCollection.delete_one({'_id': ObjectId(i)})
+            messagebox.showinfo('Sukces', 'Wypożyczenie zostało zakończone')
+            viewActiveRents()
     else:
         messagebox.showerror('Błąd', 'Nie wybrano żadnego wypożyczenia')
 
