@@ -149,10 +149,19 @@ def endRent():
         messagebox.showerror('Błąd', 'Nie wybrano żadnego wypożyczenia')
 
 
+def editRent(event=None):
+    global app
+
+    selected = app.activeTable.selection()
+    fetchedRent = activeCollection.find_one({"_id": ObjectId(selected[0])})
+    editWindow = EditRentWindow(app, fetchedRent)
+
+
 app = App(viewActive=viewActiveRents,
           viewHistory=viewHistoryRents,
           addRent=addRent,
-          endRent=endRent)
+          endRent=endRent,
+          editRent=editRent)
 
 if __name__ == '__main__':
     viewActiveRents()

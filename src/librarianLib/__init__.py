@@ -6,7 +6,7 @@ from typing import Self
 
 class App(Tk):
 
-    def __init__(self, viewActive, viewHistory, addRent, endRent) -> Tk:
+    def __init__(self, viewActive, viewHistory, addRent, endRent, editRent) -> Tk:
         super().__init__()
         self.title("Librarian")
         self.state('zoomed')
@@ -73,6 +73,8 @@ class App(Tk):
         self.activeTable.tag_configure('evenrow', background='lightblue')
 
         self.treeScroll.config(command=self.activeTable.yview)
+
+        self.activeTable.bind('<Double-1>', editRent)
 
         ############################## HISTORY TABLE #########################################
         self.historyTable = ttk.Treeview(self.treeFrame, yscrollcommand=self.treeScroll.set, selectmode='extended',
@@ -220,4 +222,102 @@ class AddRentWindow():
 
     def returnData(self):
         return self.rentData
+    
+
+class EditRentWindow():
+
+    def __init__(self, root: Tk, rentData: dict):
+        self.window = Toplevel(root)
+        self.window.title('Edycja wypożyczenia')
+        self.window.grab_set()
+
+        ### VARIABLES ###
+        self.name = StringVar(value=rentData['name'])
+        self.lastName = StringVar(value=rentData['lastName'])
+        self.schoolClass = StringVar(value=rentData['schoolClass'])
+        self.bookTitle = StringVar(value=rentData['bookTitle'])
+        self.deposit = IntVar(value=rentData['deposit'])
+
+        ### MAIN FRAME ###
+        self.mainFrame = Frame(self.window)
+        self.mainFrame.pack()
+
+        ### WINDOW LABEL ###
+        self.windowLabel = LabelFrame(self.mainFrame, text='Edycja wypożyczenia', font='Arial, 9')
+        self.windowLabel.grid(row=0, column=0, padx=20, pady=20)
         
+        ### NAME ###
+        self.nameLabel = Label(self.windowLabel, text='Imię')
+        self.nameLabel.grid(row=0, column=0)
+        self.nameEntry = Entry(self.windowLabel, textvariable=self.name)
+        self.nameEntry.grid(row=1, column=0, padx=20)
+
+        ### LAST NAME ###
+        self.lastNameLabel = Label(self.windowLabel, text='Nazwisko')
+        self.lastNameLabel.grid(row=0, column=1)
+        self.lastNameEntry = Entry(self.windowLabel, textvariable=self.lastName)
+        self.lastNameEntry.grid(row=1, column=1, padx=20)
+
+        ### SCHOOL CLASS ###
+        self.schoolClassLabel = Label(self.windowLabel, text='Klasa')
+        self.schoolClassLabel.grid(row=0, column=2)
+        self.schoolClassEntry = Entry(self.windowLabel, textvariable=self.schoolClass)
+        self.schoolClassEntry.grid(row=1, column=2, padx=20)
+
+        ### BOOK TITLE ###
+        self.bookTitleLabel = Label(self.windowLabel, text='Tytuł książki')
+        self.bookTitleLabel.grid(row=2, column=0)
+        self.bookTitleEntry = Entry(self.windowLabel, textvariable=self.bookTitle)
+        self.bookTitleEntry.grid(row=3, column=0, padx=20, pady=(0, 20))
+
+        ### DEPOSIT ###
+        def depositUsed():
+            if self.isDepositEnabled.get() is True:
+                self.depositEntry.config(state='normal')
+            else:
+                self.depositEntry.config(state='disabled')
+
+        self.depositLabel = Label(self.windowLabel, text='Kaucja')
+        self.depositLabel.grid(row=5, column=0)
+        self.depositEntry = Entry(self.windowLabel)
+        self.depositEntry.grid(row=6, column=0, padx=20, pady=(0, 20))
+        self.depositEntry.config(state='disabled')
+
+        self.isDepositEnabled = BooleanVar()
+        self.isDepositEnabled.set(False)
+        self.depositCheckbox = Checkbutton(self.windowLabel, text='Wypożyczenie z kaucją?', onvalue=True, offvalue=False,
+                                      command=lambda: depositUsed(), variable=self.isDepositEnabled)
+        self.depositCheckbox.grid(row=4, column=0)
+
+        ### SUBMIT BUTTON ###
+        self.sumbitBtn = ttk.Button(self.windowLabel, text='Zatwierdź', command=self.getData)
+        self.sumbitBtn.grid(row=5, column=2, pady=20, rowspan=2)
+
+    def getData(self):
+
+        name = self.name.get()
+        lastName = self.lastName.get()
+        schoolClass = self.schoolClass.get()
+        bookTitle = self.bookTitle.get()
+
+        isValid = False
+        if self.isDepositEnabled.get() is True:
+            try:
+                deposit = int(self.depositEntry.get())
+                isValid = True
+            except ValueError:
+                messagebox.showwarning('Błąd', 'Kaucja musi być liczbą!')
+                isValid = False
+        else:
+            isValid = True
+            deposit = 'Brak'
+
+        if isValid is True:
+            self.rentData = {"name": name,
+                    "lastName": lastName, "schoolClass": schoolClass, "bookTitle": bookTitle, "deposit": deposit}
+
+            messagebox.showinfo('Dodano wypożyczenie', 'Dodano wypożyczenie')
+            self.top.destroy()
+
+    def returnData(self):
+        return self.rentData
