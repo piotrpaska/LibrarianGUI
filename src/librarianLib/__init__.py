@@ -236,7 +236,13 @@ class EditRentWindow():
         self.lastName = StringVar(value=rentData['lastName'])
         self.schoolClass = StringVar(value=rentData['schoolClass'])
         self.bookTitle = StringVar(value=rentData['bookTitle'])
-        self.deposit = IntVar(value=rentData['deposit'])
+        self.deposit = StringVar()
+        self.isDepositEnabled = BooleanVar()
+        if rentData['deposit'] == 'Brak':
+            self.isDepositEnabled.set(False)
+        else:
+            self.isDepositEnabled.set(True)
+            self.deposit.set(int(rentData['deposit']))
 
         ### MAIN FRAME ###
         self.mainFrame = Frame(self.window)
@@ -274,20 +280,21 @@ class EditRentWindow():
         def depositUsed():
             if self.isDepositEnabled.get() is True:
                 self.depositEntry.config(state='normal')
+                self.depositCheckbox.select()
             else:
                 self.depositEntry.config(state='disabled')
+                self.depositCheckbox.deselect()
 
         self.depositLabel = Label(self.windowLabel, text='Kaucja')
         self.depositLabel.grid(row=5, column=0)
-        self.depositEntry = Entry(self.windowLabel)
+        self.depositEntry = Entry(self.windowLabel, textvariable=self.deposit)
         self.depositEntry.grid(row=6, column=0, padx=20, pady=(0, 20))
-        self.depositEntry.config(state='disabled')
 
-        self.isDepositEnabled = BooleanVar()
-        self.isDepositEnabled.set(False)
         self.depositCheckbox = Checkbutton(self.windowLabel, text='Wypożyczenie z kaucją?', onvalue=True, offvalue=False,
-                                      command=lambda: depositUsed(), variable=self.isDepositEnabled)
+                                      command=depositUsed, variable=self.isDepositEnabled)
         self.depositCheckbox.grid(row=4, column=0)
+
+        depositUsed()
 
         ### SUBMIT BUTTON ###
         self.sumbitBtn = ttk.Button(self.windowLabel, text='Zatwierdź', command=self.getData)
