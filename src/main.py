@@ -155,6 +155,10 @@ def editRent(event=None):
     selected = app.activeTable.selection()
     fetchedRent = activeCollection.find_one({"_id": ObjectId(selected[0])})
     editWindow = EditRentWindow(app, fetchedRent)
+    editWindow.top.wait_window()
+    rentData = editWindow.returnData()
+    if rentData is not None:
+        activeCollection.update_one({'_id': ObjectId(selected[0])}, {'$set': rentData})
 
 
 app = App(viewActive=viewActiveRents,

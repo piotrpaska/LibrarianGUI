@@ -227,16 +227,16 @@ class AddRentWindow():
 class EditRentWindow():
 
     def __init__(self, root: Tk, rentData: dict):
-        self.window = Toplevel(root)
-        self.window.title('Edycja wypożyczenia')
-        self.window.grab_set()
+        self.top = Toplevel(root)
+        self.top.title('Edycja wypożyczenia')
+        self.top.grab_set()
 
         ### VARIABLES ###
         self.name = StringVar(value=rentData['name'])
         self.lastName = StringVar(value=rentData['lastName'])
         self.schoolClass = StringVar(value=rentData['schoolClass'])
         self.bookTitle = StringVar(value=rentData['bookTitle'])
-        self.deposit = StringVar()
+        self.deposit = IntVar()
         self.isDepositEnabled = BooleanVar()
         if rentData['deposit'] == 'Brak':
             self.isDepositEnabled.set(False)
@@ -245,7 +245,7 @@ class EditRentWindow():
             self.deposit.set(int(rentData['deposit']))
 
         ### MAIN FRAME ###
-        self.mainFrame = Frame(self.window)
+        self.mainFrame = Frame(self.top)
         self.mainFrame.pack()
 
         ### WINDOW LABEL ###
@@ -323,7 +323,7 @@ class EditRentWindow():
             self.rentData = {"name": name,
                     "lastName": lastName, "schoolClass": schoolClass, "bookTitle": bookTitle, "deposit": deposit}
 
-            messagebox.showinfo('Dodano wypożyczenie', 'Dodano wypożyczenie')
+            messagebox.showinfo('Zmodyfikowano wypożyczenie', 'Edycja wypożyczenia')
             self.top.destroy()
 
     def returnData(self):
