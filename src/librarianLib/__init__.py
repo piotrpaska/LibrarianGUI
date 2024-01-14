@@ -233,6 +233,8 @@ class EditRentWindow():
         self.top.title('Edycja wypożyczenia')
         self.top.grab_set()
 
+        self.rentData = None
+
         ### VARIABLES ###
         self.name = StringVar(value=rentData['name'])
         self.lastName = StringVar(value=rentData['lastName'])

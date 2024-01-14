@@ -229,7 +229,14 @@ def editRent(event=None):
     editWindow = EditRentWindow(app.window, fetchedRent)
     editWindow.top.wait_window()
     rentData = editWindow.returnData()
+
     if rentData is not None:
+        rentData['rentalDate'] = str(datetime.datetime.today().strftime(dateFormat))
+        if editWindow.isDepositEnabled.get() is True:
+            rentData['maxDate'] = str((datetime.datetime.today() + datetime.timedelta(weeks=2)).strftime(dateFormat))
+        else:
+            rentData['maxDate'] = '14:10'   
+
         activeCollection.update_one({'_id': ObjectId(selected[0])}, {'$set': rentData})
 
     del editWindow
