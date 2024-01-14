@@ -33,17 +33,8 @@ historyCollection = db[configFile['history_rents_collection_name']]
 
 def viewActiveRents():
     global app
-    global token
-    if keycloakLib.checkToken(token) is False:
-        messagebox.showerror('Błąd', 'Sesja wygasła')
-        app.window.destroy()
+    if functionDependentions(0) is False:
         return
-    else:
-        if keycloakLib.checkRole(username, 0) is True:
-            token = keycloakOpenId.refresh_token(token['refresh_token'])
-        else:
-            messagebox.showerror('Błąd', 'Nie masz uprawnień do tej czynności')
-            return
         
     app.historyTable.pack_forget()
     app.activeTable.pack(anchor=E)
@@ -104,17 +95,8 @@ def viewActiveRents():
 
 def viewHistoryRents():
     global app
-    global token
-    if keycloakLib.checkToken(token) is False:
-        messagebox.showerror('Błąd', 'Sesja wygasła')
-        app.window.destroy()
+    if functionDependentions(0) is False:
         return
-    else:
-        if keycloakLib.checkRole(username, 0) is True:
-            token = keycloakOpenId.refresh_token(token['refresh_token'])
-        else:
-            messagebox.showerror('Błąd', 'Nie masz uprawnień do tej czynności')
-            return
         
     app.activeTable.pack_forget()
     app.historyTable.pack(anchor=E)
@@ -154,17 +136,8 @@ def viewHistoryRents():
 
 def addRent():
     global app
-    global token
-    if keycloakLib.checkToken(token) is False:
-        messagebox.showerror('Błąd', 'Sesja wygasła')
-        app.window.destroy()
+    if functionDependentions(1) is False:
         return
-    else:
-        if keycloakLib.checkRole(username, 1) is True:
-            token = keycloakOpenId.refresh_token(token['refresh_token'])
-        else:
-            messagebox.showerror('Błąd', 'Nie masz uprawnień do tej czynności')
-            return
 
     rentWindow = AddRentWindow(app.window)
     rentWindow.top.wait_window()
@@ -185,17 +158,8 @@ def addRent():
 
 def endRent():
     global app
-    global token
-    if keycloakLib.checkToken(token) is False:
-        messagebox.showerror('Błąd', 'Sesja wygasła')
-        app.window.destroy()
+    if functionDependentions(1) is False:
         return
-    else:
-        if keycloakLib.checkRole(username, 1) is True:
-            token = keycloakOpenId.refresh_token(token['refresh_token'])
-        else:
-            messagebox.showerror('Błąd', 'Nie masz uprawnień do tej czynności')
-            return
         
     selected = app.activeTable.selection()
     if len(selected) != 0:
@@ -212,17 +176,8 @@ def endRent():
 
 def editRent(event=None):
     global app
-    global token
-    if keycloakLib.checkToken(token) is False:
-        messagebox.showerror('Błąd', 'Sesja wygasła')
-        app.window.destroy()
+    if functionDependentions(1) is False:
         return
-    else:
-        if keycloakLib.checkRole(username, 1) is True:
-            token = keycloakOpenId.refresh_token(token['refresh_token'])
-        else:
-            messagebox.showerror('Błąd', 'Nie masz uprawnień do tej czynności')
-            return
 
     selected = app.activeTable.selection()
     fetchedRent = activeCollection.find_one({"_id": ObjectId(selected[0])})
@@ -240,6 +195,22 @@ def editRent(event=None):
         activeCollection.update_one({'_id': ObjectId(selected[0])}, {'$set': rentData})
 
     del editWindow
+
+
+def functionDependentions(roleLevel: int):
+    global token
+    global app
+    global username
+    if keycloakLib.checkToken(token) is False:
+        messagebox.showerror('Błąd', 'Sesja wygasła')
+        app.window.destroy()
+        return False
+    else:
+        if keycloakLib.checkRole(username, roleLevel) is True:
+            token = keycloakOpenId.refresh_token(token['refresh_token'])
+        else:
+            messagebox.showerror('Błąd', 'Nie masz uprawnień do tej czynności')
+            return False
 
 
 def login():
