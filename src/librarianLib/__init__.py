@@ -4,12 +4,12 @@ from tkinter import messagebox
 from typing import Self
 
 
-class App(Tk):
+class App():
 
     def __init__(self, viewActive, viewHistory, addRent, endRent, editRent) -> Tk:
-        super().__init__()
-        self.title("Librarian")
-        self.state('zoomed')
+        self.window = Tk()
+        self.window.title("Librarian")
+        self.window.state('zoomed')
 
         self.rentData = {}
 
@@ -33,7 +33,7 @@ class App(Tk):
                               relief='flat')
 
         ############################## TREE FRAME #########################################
-        self.treeFrame = Frame(self)
+        self.treeFrame = Frame(self.window)
         self.treeFrame.grid(row=0, column=1, padx=(0, 100), sticky=E, rowspan=5)
 
         ############################## TREE LABEL #########################################
@@ -107,7 +107,7 @@ class App(Tk):
         self.treeScroll.config(command=self.historyTable.yview)
 
         ############################## COMMANDS FRAME #########################################
-        self.commandsFrame = Frame(self)
+        self.commandsFrame = Frame(self.window)
         self.commandsFrame.grid(row=0, column=0, padx=40, sticky=W)
         self.commandsFrame['borderwidth'] = 5
 
@@ -135,6 +135,8 @@ class AddRentWindow():
         self.top = Toplevel(root)
         self.top.title('Dodaj wypożyczenie')
         self.top.grab_set()
+
+        self.rentData = None
 
         ### MAIN FRAME ###
         self.mainFrame = Frame(self.top)

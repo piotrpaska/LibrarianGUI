@@ -1,5 +1,6 @@
 from librarianLib import *
-import librarianLib
+from librarianLib.keycloakgui import *
+from librarianLib.keycloakfunc import KeycloakLib
 import pymongo
 import yaml
 import ctypes
@@ -9,11 +10,18 @@ from bson.objectid import ObjectId
 # Fixing blurry text on Windows
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
+################# GLOBAL VARIABLES #################
+global app
+global token
+global keycloakOpenIdLib
+
 ################# CONFIG FROM YAML #################
 with open('config.yml', 'r') as yamlFile:
     configFile = yaml.safe_load(yamlFile)
 
 dateFormat = configFile['date_format']
+
+keycloakConfig = configFile['keycloak']
 
 ################# MONGODB CONNECTION #################
 client = pymongo.MongoClient(configFile['mongodb_connection_string'])
@@ -118,7 +126,7 @@ def viewHistoryRents():
 
 
 def addRent():
-    rentWindow = AddRentWindow(app)
+    rentWindow = AddRentWindow(app.window)
     rentWindow.top.wait_window()
     rentData = rentWindow.returnData()
     if rentData is not None:
@@ -129,6 +137,8 @@ def addRent():
             rentData['maxDate'] = '14:10'
         print(rentData)
         activeCollection.insert_one(rentData)
+    else:
+        return
 
     viewActiveRents()
     del rentWindow
@@ -154,19 +164,48 @@ def editRent(event=None):
 
     selected = app.activeTable.selection()
     fetchedRent = activeCollection.find_one({"_id": ObjectId(selected[0])})
-    editWindow = EditRentWindow(app, fetchedRent)
+    editWindow = EditRentWindow(app.window, fetchedRent)
     editWindow.top.wait_window()
     rentData = editWindow.returnData()
     if rentData is not None:
         activeCollection.update_one({'_id': ObjectId(selected[0])}, {'$set': rentData})
 
+    del editWindow
 
-app = App(viewActive=viewActiveRents,
-          viewHistory=viewHistoryRents,
-          addRent=addRent,
-          endRent=endRent,
-          editRent=editRent)
+
+def login():
+    global loginWindow
+    global token
+    loginData = loginWindow.returnData()
+    checkLogin = keycloakOpenIdClass.login(loginData['username'], loginData['password'])
+    if checkLogin[0] is True and checkLogin is not None:
+        token = checkLogin[1]
+        loginWindow.top.destroy()
+        return True
+    else:
+        messagebox.showerror('Błąd', 'Niepoprawny login lub hasło')
+
+
+
+
+keycloakOpenIdClass = KeycloakLib(keycloakConfig['server_url'],
+                                keycloakConfig['realm_name'],
+                                keycloakConfig['openID']['client_id'],
+                                keycloakConfig['openID']['client_secret'])
+
+keycloakOpenId = keycloakOpenIdClass.keycloakOpenId
+
+token = None
 
 if __name__ == '__main__':
+    loginWindow = LoginWindow(login)
+    loginWindow.top.mainloop()
+
+    app = App(viewActive=viewActiveRents,
+            viewHistory=viewHistoryRents,
+            addRent=addRent,
+            endRent=endRent,
+            editRent=editRent)
+
     viewActiveRents()
-    app.mainloop()
+    app.window.mainloop()
