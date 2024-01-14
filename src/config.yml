@@ -1,0 +1,56 @@
+#Nazwa pliku zapisującego aktywne wypożyczenia w trybie lokalnym
+active_hires_file_name: active.json
+#Nazwa pliku zapisującego historię wypożyczeń w trybie lokalnym
+history_file_name: history.json
+#Format, w jakim zapisywana jest data wypożyczenia lub zwrotu książki itp.
+date_format: '%d.%m.%Y'
+# Adres bazy danych MongoDB
+mongodb_connection_string: mongodb+srv://admin:9F1ghter5@librarian.3akhsbc.mongodb.net/?retryWrites=true&w=majority
+# Nazwa bazy danych, w której będziesz trzymać wszystkie dane o wypożyczeniach
+mongo_rents_db_name: Testing
+# Nazwa bazy danych, w której trzymasz listę referencji, aby program mógł się zalogować do MongoDB
+mongo_users_db: Users
+# Nazwa kolekcji, w której trzymasz listę referencji, aby program mógł się zalogować do MongoDB
+mongo_users_collection: users
+# Nazwa kolekcji, w której będziesz trzymać listę trwających wypożyczeń
+active_rents_collection_name: activeRents
+# Nazwa kolekcji, w której będziesz trzymać historię wypożyczeń
+history_rents_collection_name: historyRents
+# Nazwa kolekcji, w której będziesz trzymać spis książek
+books_list_collection_name: booksList
+#Email, z którego będziesz wysyłać emaile z kodem potwierdzającym, zmianą hasła itp.
+sender_email: librarian.no.reply@gmail.com
+#Emaile administratorów
+admins_emails:
+    - paska.piotrek@gmail.com
+#Program wysyła emaile przez serwery Gmail
+sender_password: dqqeaqhxqbitojvh
+
+# Nazwy ról w bazie Keycloak
+# Zawsze muszą być tylko 3 role (widz, bibliotekarz i administrator)
+# Możesz zmieniać nazwy dla własnej wygody
+viewer_role_name: viewer
+librarian_role_name: librarian
+admin_role_name: admin
+# Nazwa aplikacji, która będzie wyświetlała się w aplikacji dla jednorazowych haseł (One Time Password)
+totp_app_name: Librarian
+# Nazwa użytkownika, który będzie wyświetlał się w aplikacji dla jednorazowych haseł (One Time Password)
+# Zalecam zostawić Admin wtedy kod QR będzie taki sam dla wszystkich administratorów
+totp_user_name: Admin
+
+# Konfiguracja dostępu do bazy Keycloak
+keycloak:
+    # Adres URL twojego serwera do bazy keycloak
+    server_url: 'https://lemur-5.cloud-iam.com/auth/'
+    # Nazwa realmu
+    realm_name: librarian-keycloak
+    openID:
+        # Nazwa klienta, przez którego się łączysz
+        client_id: python-app
+        # Client-SecretKey - potrzebny, aby połączyć się przez klienta do bazy keyclaok
+        client_secret: 'xa1ze6H4EjrdOCrH0KDzKTHlDwKiLrB7'
+
+    # Nazwa użytkownika mającego uprawnienia administratora
+    admin_username: admin
+    # Hasło użytkownika mającego uprawnienia administratora
+    admin_password: 9F1ghter5
