@@ -10,11 +10,6 @@ from bson.objectid import ObjectId
 # Fixing blurry text on Windows
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
-################# GLOBAL VARIABLES #################
-global app
-global token
-global keycloakOpenIdLib
-
 ################# CONFIG FROM YAML #################
 with open('config.yml', 'r') as yamlFile:
     configFile = yaml.safe_load(yamlFile)
@@ -31,6 +26,15 @@ historyCollection = db[configFile['history_rents_collection_name']]
 
 
 def viewActiveRents():
+    global app
+    global token
+    if keycloakOpenIdClass.checkToken(token) is False:
+        messagebox.showerror('Błąd', 'Sesja wygasła')
+        app.window.destroy()
+        return
+    else:
+        token = keycloakOpenId.refresh_token(token['refresh_token'])
+        
     app.historyTable.pack_forget()
     app.activeTable.pack(anchor=E)
     app.activeTable.delete(*app.activeTable.get_children())
@@ -89,6 +93,15 @@ def viewActiveRents():
 
 
 def viewHistoryRents():
+    global app
+    global token
+    if keycloakOpenIdClass.checkToken(token) is False:
+        messagebox.showerror('Błąd', 'Sesja wygasła')
+        app.window.destroy()
+        return
+    else:
+        token = keycloakOpenId.refresh_token(token['refresh_token'])
+
     app.activeTable.pack_forget()
     app.historyTable.pack(anchor=E)
     app.historyTable.delete(*app.historyTable.get_children())
@@ -126,6 +139,15 @@ def viewHistoryRents():
 
 
 def addRent():
+    global app
+    global token
+    if keycloakOpenIdClass.checkToken(token) is False:
+        messagebox.showerror('Błąd', 'Sesja wygasła')
+        app.window.destroy()
+        return
+    else:
+        token = keycloakOpenId.refresh_token(token['refresh_token'])
+
     rentWindow = AddRentWindow(app.window)
     rentWindow.top.wait_window()
     rentData = rentWindow.returnData()
@@ -135,7 +157,6 @@ def addRent():
             rentData['maxDate'] = str((datetime.datetime.today() + datetime.timedelta(weeks=2)).strftime(dateFormat))
         else:
             rentData['maxDate'] = '14:10'
-        print(rentData)
         activeCollection.insert_one(rentData)
     else:
         return
@@ -146,6 +167,14 @@ def addRent():
 
 def endRent():
     global app
+    global token
+    if keycloakOpenIdClass.checkToken(token) is False:
+        messagebox.showerror('Błąd', 'Sesja wygasła')
+        app.window.destroy()
+        return
+    else:
+        token = keycloakOpenId.refresh_token(token['refresh_token'])
+
     selected = app.activeTable.selection()
     if len(selected) != 0:
         for i in selected:
@@ -161,6 +190,13 @@ def endRent():
 
 def editRent(event=None):
     global app
+    global token
+    if keycloakOpenIdClass.checkToken(token) is False:
+        messagebox.showerror('Błąd', 'Sesja wygasła')
+        app.window.destroy()
+        return
+    else:
+        token = keycloakOpenId.refresh_token(token['refresh_token'])
 
     selected = app.activeTable.selection()
     fetchedRent = activeCollection.find_one({"_id": ObjectId(selected[0])})
@@ -174,18 +210,19 @@ def editRent(event=None):
 
 
 def login():
-    global loginWindow
-    global token
-    loginData = loginWindow.returnData()
-    checkLogin = keycloakOpenIdClass.login(loginData['username'], loginData['password'])
-    if checkLogin[0] is True and checkLogin is not None:
-        token = checkLogin[1]
-        loginWindow.top.destroy()
-        return True
-    else:
-        messagebox.showerror('Błąd', 'Niepoprawny login lub hasło')
+    def keycloakLogin():
+        nonlocal loginWindow
+        loginData = loginWindow.returnData()
+        checkLogin = keycloakOpenIdClass.login(loginData['username'], loginData['password'])
+        if checkLogin[0] is True and checkLogin is not None:
+            global token
+            token = checkLogin[1]
+            loginWindow.top.destroy()
+        else:
+            messagebox.showerror('Błąd', 'Niepoprawny login lub hasło')
 
-
+    loginWindow = LoginWindow(keycloakLogin)
+    loginWindow.top.mainloop()
 
 
 keycloakOpenIdClass = KeycloakLib(keycloakConfig['server_url'],
@@ -197,15 +234,22 @@ keycloakOpenId = keycloakOpenIdClass.keycloakOpenId
 
 token = None
 
+def closeSesisson():
+    keycloakOpenId.logout(token['refresh_token'])
+    quit()
+
 if __name__ == '__main__':
-    loginWindow = LoginWindow(login)
-    loginWindow.top.mainloop()
 
-    app = App(viewActive=viewActiveRents,
-            viewHistory=viewHistoryRents,
-            addRent=addRent,
-            endRent=endRent,
-            editRent=editRent)
+    while True:
+        login()
 
-    viewActiveRents()
-    app.window.mainloop()
+        app = App(viewActive=viewActiveRents,
+                viewHistory=viewHistoryRents,
+                addRent=addRent,
+                endRent=endRent,
+                editRent=editRent)
+        
+        app.window.protocol("WM_DELETE_WINDOW", closeSesisson)
+
+        viewActiveRents()
+        app.window.mainloop()

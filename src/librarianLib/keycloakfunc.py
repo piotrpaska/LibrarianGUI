@@ -16,4 +16,12 @@ class KeycloakLib():
             return True, token
         except:
             return False, None
-        
+
+
+    def checkToken(self, token):
+        introspect = self.keycloakOpenId.introspect(token['access_token'])
+
+        if introspect['active'] is True:
+            return True
+        else:
+            return False
