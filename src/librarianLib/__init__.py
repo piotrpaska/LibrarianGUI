@@ -1,7 +1,6 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-from typing import Self
 
 
 class App():
@@ -23,29 +22,42 @@ class App():
                             fieldbackground='silver',
                             font='Arial, 10')
         treestyle.map('Treeview',
-                      background=[('selected', '#4545d6')])
-        ### BUTTON STYLE ###
-        buttonStyle = ttk.Style()
-        buttonStyle.theme_use('default')
-        buttonStyle.configure("TButton",
-                              background="silver",
-                              font='Arial, 10',
-                              relief='flat')
+                      background=[('selected', '#2222FF')])
 
         ############################## TREE FRAME #########################################
-        self.treeFrame = Frame(self.window)
-        self.treeFrame.grid(row=0, column=1, padx=(0, 100), sticky=E, rowspan=5)
+        #self.treeFrame = Frame(self.window)
+        #self.treeFrame.grid(row=0, column=1, padx=(0, 100), rowspan=5)
+
+        ############################## TREEVIEWS NOTEBOOK #################################
+        def switch_to_active_tab(event):
+            viewActive()
+
+        def switch_to_history_tab(event):
+            viewHistory()
+
+        self.rentsNotebook = ttk.Notebook(self.window)
+        
+        self.activeTab = Frame(self.rentsNotebook)
+        self.historyTab = Frame(self.rentsNotebook)
+
+        self.rentsNotebook.add(self.activeTab, text='Wypożyczenia')
+        self.rentsNotebook.add(self.historyTab, text='Historia')
+        self.rentsNotebook.bind("<<NotebookTabChanged>>", switch_to_active_tab)
+        self.rentsNotebook.bind("<<NotebookTabChanged>>", switch_to_history_tab)
+        self.rentsNotebook.grid(row=0, column=1, rowspan=5, sticky=E, pady=20)
 
         ############################## TREE LABEL #########################################
-        self.treeLabel = Label(self.treeFrame, text='Aktywne wypożyczenia', font='Arial, 14')
-        self.treeLabel.pack(pady=20)
+        self.activeTreeLabel = Label(self.activeTab, text='Aktywne wypożyczenia', font='Arial, 14')
+        self.activeTreeLabel.pack(pady=20, anchor=CENTER)
 
-        ############################## TREE SCROLL #########################################
-        self.treeScroll = Scrollbar(self.treeFrame)
-        self.treeScroll.pack(side=RIGHT, fill=Y)
+        self.historyTreeLabel = Label(self.historyTab, text='Historia wypożyczeń', font='Arial, 14')
+        self.historyTreeLabel.pack(pady=20, anchor=CENTER)
 
         ############################## ACTIVE TABLE #########################################
-        self.activeTable = ttk.Treeview(self.treeFrame, yscrollcommand=self.treeScroll.set, selectmode='extended',
+        self.activeTreeScroll = Scrollbar(self.activeTab)
+        self.activeTreeScroll.pack(side=RIGHT, fill=Y)
+
+        self.activeTable = ttk.Treeview(self.activeTab, yscrollcommand=self.activeTreeScroll.set, selectmode='extended',
                                         columns=('name', 'lastName', 'schoolClass', 'bookTitle', 'rentalDate',
                                                  'maxDate', 'deposit', 'state'),
                                         show='headings')
@@ -72,12 +84,17 @@ class App():
         self.activeTable.tag_configure('oddrow', background='white')
         self.activeTable.tag_configure('evenrow', background='lightblue')
 
-        self.treeScroll.config(command=self.activeTable.yview)
+        self.activeTreeScroll.config(command=self.activeTable.yview)
 
         self.activeTable.bind('<Double-1>', editRent)
 
+        self.activeTable.pack(fill='both', expand="yes")
+
         ############################## HISTORY TABLE #########################################
-        self.historyTable = ttk.Treeview(self.treeFrame, yscrollcommand=self.treeScroll.set, selectmode='extended',
+        self.historyTreeScroll = Scrollbar(self.historyTab)
+        self.historyTreeScroll.pack(side=RIGHT, fill=Y)
+
+        self.historyTable = ttk.Treeview(self.historyTab, yscrollcommand=self.historyTreeScroll.set, selectmode='extended',
                                          columns=('name', 'lastName', 'schoolClass', 'bookTitle', 'rentalDate',
                                                   'maxDate', 'returnDate', 'deposit'),
                                          show='headings')
@@ -104,11 +121,13 @@ class App():
         self.historyTable.tag_configure('oddrow', background='white')
         self.historyTable.tag_configure('evenrow', background='lightblue')
 
-        self.treeScroll.config(command=self.historyTable.yview)
+        self.historyTreeScroll.config(command=self.historyTable.yview)
+
+        self.historyTable.pack(fill='both', expand="yes")
 
         ############################## COMMANDS FRAME #########################################
         self.commandsFrame = Frame(self.window)
-        self.commandsFrame.grid(row=0, column=0, padx=40, sticky=W)
+        self.commandsFrame.grid(row=0, column=0, padx=20, sticky=W)
         self.commandsFrame['borderwidth'] = 5
 
         ############################## COMMANDS FRAME LABEL #########################################
@@ -116,17 +135,12 @@ class App():
         self.commandsFrameLabel.pack(fill='both', expand="yes")
 
         ############################## COMMANDS FRAME BUTTONS #########################################
-        ### VIEW BUTTONS ###
-        self.viewActiveBtn = ttk.Button(self.commandsFrameLabel, text='Aktywne wypożyczenia', command=viewActive)
-        self.viewHistoryBtn = ttk.Button(self.commandsFrameLabel, text='Historia wypożyczeń', command=viewHistory)
-        self.viewActiveBtn.pack(pady=10)
-        self.viewHistoryBtn.pack(pady=10)
         ### ADD RENT BUTTON ###
-        self.addRentBtn = ttk.Button(self.commandsFrameLabel, text='Dodaj wypożyczenie', command=addRent)
-        self.addRentBtn.pack(pady=10)
+        self.addRentBtn = Button(self.commandsFrameLabel, text='Dodaj wypożyczenie', command=addRent)
+        self.addRentBtn.pack(pady=10, anchor=CENTER)
         ### END RENT BUTTON ###
-        self.endRentBtn = ttk.Button(self.commandsFrameLabel, text='Zakończ wypożyczenie', command=endRent)
-        self.endRentBtn.pack(pady=10)
+        self.endRentBtn = Button(self.commandsFrameLabel, text='Zakończ wypożyczenie', command=endRent)
+        self.endRentBtn.pack(pady=10, anchor=CENTER)
 
 
 class AddRentWindow():

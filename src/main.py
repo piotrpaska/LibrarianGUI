@@ -36,11 +36,7 @@ def viewActiveRents():
     if functionDependentions(0) is False:
         return
         
-    app.historyTable.pack_forget()
-    app.activeTable.pack(anchor=E)
     app.activeTable.delete(*app.activeTable.get_children())
-
-    app.treeLabel.config(text='Aktywne wypożyczenia')
 
     count = 0
     for rent in activeCollection.find():
@@ -98,12 +94,8 @@ def viewHistoryRents():
     if functionDependentions(0) is False:
         return
         
-    app.activeTable.pack_forget()
-    app.historyTable.pack(anchor=E)
     app.historyTable.delete(*app.historyTable.get_children())
-
-    app.treeLabel.config(text='Historia wypożyczeń')
-
+    
     count = 0
     for rent in historyCollection.find():
         if count % 2 == 0:
