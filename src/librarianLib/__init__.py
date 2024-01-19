@@ -29,11 +29,12 @@ class App():
         #self.treeFrame.grid(row=0, column=1, padx=(0, 100), rowspan=5)
 
         ############################## TREEVIEWS NOTEBOOK #################################
-        def switch_to_active_tab(event):
-            viewActive()
-
-        def switch_to_history_tab(event):
-            viewHistory()
+        def switch_tab(event):
+            tab = event.widget.tab('current')['text']
+            if tab == 'Wypożyczenia':
+                viewActive()
+            elif tab == 'Historia':
+                viewHistory()
 
         self.rentsNotebook = ttk.Notebook(self.window)
         
@@ -42,8 +43,7 @@ class App():
 
         self.rentsNotebook.add(self.activeTab, text='Wypożyczenia')
         self.rentsNotebook.add(self.historyTab, text='Historia')
-        self.rentsNotebook.bind("<<NotebookTabChanged>>", switch_to_active_tab)
-        self.rentsNotebook.bind("<<NotebookTabChanged>>", switch_to_history_tab)
+        self.rentsNotebook.bind("<<NotebookTabChanged>>", switch_tab)
         self.rentsNotebook.grid(row=0, column=1, rowspan=5, sticky=E, pady=20)
 
         ############################## TREE LABEL #########################################
