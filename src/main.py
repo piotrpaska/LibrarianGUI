@@ -35,7 +35,7 @@ def viewActiveRents():
     global app
     if functionDependentions(0) is False:
         return
-        
+
     app.activeTable.delete(*app.activeTable.get_children())
 
     count = 0
@@ -93,9 +93,9 @@ def viewHistoryRents():
     global app
     if functionDependentions(0) is False:
         return
-        
+
     app.historyTable.delete(*app.historyTable.get_children())
-    
+
     count = 0
     for rent in historyCollection.find():
         if count % 2 == 0:
@@ -126,7 +126,7 @@ def viewHistoryRents():
         count += 1
 
 
-def addRent():
+def newRent():
     global app
     if functionDependentions(1) is False:
         return
@@ -152,7 +152,7 @@ def endRent():
     global app
     if functionDependentions(1) is False:
         return
-        
+
     selected = app.activeTable.selection()
     if len(selected) != 0:
         for i in selected:
@@ -182,7 +182,7 @@ def editRent(event=None):
         if editWindow.isDepositEnabled.get() is True:
             rentData['maxDate'] = str((datetime.datetime.today() + datetime.timedelta(weeks=2)).strftime(dateFormat))
         else:
-            rentData['maxDate'] = '14:10'   
+            rentData['maxDate'] = '14:10'
 
         activeCollection.update_one({'_id': ObjectId(selected[0])}, {'$set': rentData})
 
@@ -240,6 +240,7 @@ def closeSesisson():
     keycloakOpenId.logout(token['refresh_token'])
     quit()
 
+
 if __name__ == '__main__':
 
     while True:
@@ -247,10 +248,10 @@ if __name__ == '__main__':
 
         app = App(viewActive=viewActiveRents,
                 viewHistory=viewHistoryRents,
-                addRent=addRent,
+                addRent=newRent,
                 endRent=endRent,
                 editRent=editRent)
-        
+
         app.window.protocol("WM_DELETE_WINDOW", closeSesisson)
 
         viewActiveRents()

@@ -12,6 +12,8 @@ class App():
 
         self.rentData = {}
 
+        self.columns = ('name', 'lastName', 'schoolClass', 'bookTitle', 'deposit', 'rentalDate', 'maxDate')
+
         ############################## STYLES #########################################
         ### TREE STYLE ###
         treestyle = ttk.Style()
@@ -24,11 +26,8 @@ class App():
         treestyle.map('Treeview',
                       background=[('selected', '#2222FF')])
 
-        ############################## TREE FRAME #########################################
-        #self.treeFrame = Frame(self.window)
-        #self.treeFrame.grid(row=0, column=1, padx=(0, 100), rowspan=5)
-
         ############################## TREEVIEWS NOTEBOOK #################################
+
         def switch_tab(event):
             tab = event.widget.tab('current')['text']
             if tab == 'Wypożyczenia':
@@ -37,26 +36,65 @@ class App():
                 viewHistory()
 
         self.rentsNotebook = ttk.Notebook(self.window)
-        
-        self.activeTab = Frame(self.rentsNotebook)
-        self.historyTab = Frame(self.rentsNotebook)
+
+        self.setupActiveTable()
+        self.setupHistoryTable()
 
         self.rentsNotebook.add(self.activeTab, text='Wypożyczenia')
         self.rentsNotebook.add(self.historyTab, text='Historia')
         self.rentsNotebook.bind("<<NotebookTabChanged>>", switch_tab)
-        self.rentsNotebook.grid(row=0, column=1, rowspan=5, sticky=E, pady=20)
+        self.rentsNotebook.pack(fill='both', expand='yes', padx=20, pady=20)
 
-        ############################## TREE LABEL #########################################
-        self.activeTreeLabel = Label(self.activeTab, text='Aktywne wypożyczenia', font='Arial, 14')
-        self.activeTreeLabel.pack(pady=20, anchor=CENTER)
+    def setupActiveTable(self):
+        
+        ### ACTIVE TAB ###
+        self.activeTab = Frame(self.rentsNotebook)
 
-        self.historyTreeLabel = Label(self.historyTab, text='Historia wypożyczeń', font='Arial, 14')
-        self.historyTreeLabel.pack(pady=20, anchor=CENTER)
+        ### UI FRAME ###
+        self.activeUIFrame = Frame(self.activeTab)
+        self.activeUIFrame.pack(side=TOP, fill=X, pady=(0, 10))
 
-        ############################## ACTIVE TABLE #########################################
+        ### FILTER FRAME ###
+        self.activeFilterFrame = Frame(self.activeUIFrame)
+        self.activeFilterFrame.pack(side=LEFT, fill=X, padx=20, pady=20)
+
+        ### COMMANDS FRAME ###
+        self.activeCommandsFrame = Frame(self.activeUIFrame)
+        self.activeCommandsFrame.pack(side=RIGHT, fill=X, padx=20, pady=20)
+
+        ### ACTIVE LABEL ###
+        self.activeTreeLabel = Label(self.activeFilterFrame, text='Aktywne wypożyczenia', font='Arial, 14')
+        self.activeTreeLabel.grid(row=0, column=0, sticky=W, columnspan=2, pady=(0, 20))
+
+        ### FILTER BY COMBOBOX ###
+        self.activeFilterBy = ttk.Combobox(self.activeFilterFrame, values=self.columns[0:5], state='readonly')
+        self.activeFilterBy.grid(row=1, column=0, sticky=W, padx=(0, 7))
+        
+        ### FILTER BY ENTRY ###
+        self.activeFilter = Entry(self.activeFilterFrame)
+        self.activeFilter.grid(row=1, column=1, sticky=W, padx=(0, 7))
+
+        ### FILTER BUTTON ###
+        self.activeFilterBtn = Button(self.activeFilterFrame, text='Filtruj', height=1) # Assign command in main.py (filterActiveTable)
+        self.activeFilterBtn.grid(row=1, column=3, sticky=W)
+        
+        ### COMMANDS LABEL ###
+        self.commandsLabel = Label(self.activeCommandsFrame, text='Komendy', font='Arial, 14')
+        self.commandsLabel.grid(row=0, column=0, sticky=E, pady=(0, 20))
+
+        ### NEW RENT BUTTON ###
+        self.newRentBtn = Button(self.activeCommandsFrame, text='Nowe wypożyczenie', width=20) # Assign command in main.py
+        self.newRentBtn.grid(row=1, column=0, sticky=E, pady=(0, 10))
+
+        ### END RENT BUTTON ###
+        self.endRentBtn = Button(self.activeCommandsFrame, text='Zakończ wypożyczenie', width=20) # Assign command in main.py
+        self.endRentBtn.grid(row=2, column=0, sticky=E, pady=(0, 10))
+        
+        ### ACTIVE TREE SCROLLBAR ###
         self.activeTreeScroll = Scrollbar(self.activeTab)
         self.activeTreeScroll.pack(side=RIGHT, fill=Y)
 
+        ############################## ACTIVE TABLE #########################################
         self.activeTable = ttk.Treeview(self.activeTab, yscrollcommand=self.activeTreeScroll.set, selectmode='extended',
                                         columns=('name', 'lastName', 'schoolClass', 'bookTitle', 'rentalDate',
                                                  'maxDate', 'deposit', 'state'),
@@ -86,11 +124,31 @@ class App():
 
         self.activeTreeScroll.config(command=self.activeTable.yview)
 
-        self.activeTable.bind('<Double-1>', editRent)
+        #self.activeTable.bind('<Double-1>', editRent)
 
         self.activeTable.pack(fill='both', expand="yes")
 
-        ############################## HISTORY TABLE #########################################
+    def setupHistoryTable(self):
+        self.historyTab = Frame(self.rentsNotebook)
+
+        self.historyUIFrame = Frame(self.historyTab)
+        self.historyUIFrame.pack(side=TOP, fill=X, pady=(0, 10))
+
+        self.historyFilterFrame = Frame(self.historyUIFrame)
+        self.historyFilterFrame.pack(side=LEFT, fill=X, padx=20, pady=20)
+
+        self.historyLabel = Label(self.historyFilterFrame, text='Historia', font='Arial, 14')
+        self.historyLabel.grid(row=0, column=0, sticky=W, columnspan=2, pady=(0, 20))
+
+        self.historyFilterBy = ttk.Combobox(self.historyFilterFrame, values=self.columns[0:5], state='readonly')
+        self.historyFilterBy.grid(row=1, column=0, sticky=W, padx=(0, 7))
+
+        self.historyFilter = Entry(self.historyFilterFrame)
+        self.historyFilter.grid(row=1, column=1, sticky=W, padx=(0, 7))
+
+        self.historyFilterBtn = Button(self.historyFilterFrame, text='Filtruj', height=1) # Assign command in main.py (filterHistoryTable)
+        self.historyFilterBtn.grid(row=1, column=3, sticky=W)
+
         self.historyTreeScroll = Scrollbar(self.historyTab)
         self.historyTreeScroll.pack(side=RIGHT, fill=Y)
 
@@ -125,22 +183,7 @@ class App():
 
         self.historyTable.pack(fill='both', expand="yes")
 
-        ############################## COMMANDS FRAME #########################################
-        self.commandsFrame = Frame(self.window)
-        self.commandsFrame.grid(row=0, column=0, padx=20, sticky=W)
-        self.commandsFrame['borderwidth'] = 5
-
-        ############################## COMMANDS FRAME LABEL #########################################
-        self.commandsFrameLabel = LabelFrame(self.commandsFrame, text='Commands', padx=20, pady=20)
-        self.commandsFrameLabel.pack(fill='both', expand="yes")
-
-        ############################## COMMANDS FRAME BUTTONS #########################################
-        ### ADD RENT BUTTON ###
-        self.addRentBtn = Button(self.commandsFrameLabel, text='Dodaj wypożyczenie', command=addRent)
-        self.addRentBtn.pack(pady=10, anchor=CENTER)
-        ### END RENT BUTTON ###
-        self.endRentBtn = Button(self.commandsFrameLabel, text='Zakończ wypożyczenie', command=endRent)
-        self.endRentBtn.pack(pady=10, anchor=CENTER)
+        
 
 
 class AddRentWindow():
