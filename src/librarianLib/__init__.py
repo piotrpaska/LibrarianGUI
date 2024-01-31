@@ -5,7 +5,7 @@ from tkinter import messagebox
 
 class App():
 
-    def __init__(self, viewActive, viewHistory, addRent, endRent, editRent) -> Tk:
+    def __init__(self, viewActive, viewHistory) -> Tk:
         self.window = Tk()
         self.window.title("Librarian")
         self.window.state('zoomed')
@@ -123,8 +123,6 @@ class App():
         self.activeTable.tag_configure('evenrow', background='lightblue')
 
         self.activeTreeScroll.config(command=self.activeTable.yview)
-
-        #self.activeTable.bind('<Double-1>', editRent)
 
         self.activeTable.pack(fill='both', expand="yes")
 

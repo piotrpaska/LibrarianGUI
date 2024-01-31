@@ -152,16 +152,19 @@ def endRent():
     global app
     if functionDependentions(1) is False:
         return
-
+    
     selected = app.activeTable.selection()
     if len(selected) != 0:
-        for i in selected:
-            rent = activeCollection.find_one({"_id": ObjectId(i)})
-            rent['returnDate'] = str(datetime.datetime.today().strftime(dateFormat))
-            historyCollection.insert_one(rent)
-            activeCollection.delete_one({'_id': ObjectId(i)})
-            messagebox.showinfo('Sukces', 'Wypożyczenie zostało zakończone')
-            viewActiveRents()
+        if messagebox.askyesno('Zakończenie wypożyczenia', 'Czy na pewno chcesz zakończyć wypożyczenie?'):
+            for i in selected:
+                rent = activeCollection.find_one({"_id": ObjectId(i)})
+                rent['returnDate'] = str(datetime.datetime.today().strftime(dateFormat))
+                historyCollection.insert_one(rent)
+                activeCollection.delete_one({'_id': ObjectId(i)})
+                messagebox.showinfo('Sukces', 'Wypożyczenie zostało zakończone')
+                viewActiveRents()
+        else:
+            return
     else:
         messagebox.showerror('Błąd', 'Nie wybrano żadnego wypożyczenia')
 
@@ -204,7 +207,6 @@ def functionDependentions(roleLevel: int):
             messagebox.showerror('Błąd', 'Nie masz uprawnień do tej czynności')
             return False
 
-
 def login():
     def keycloakLogin():
         nonlocal loginWindow
@@ -237,8 +239,12 @@ keycloakAdmin = keycloakLib.keycloakAdmin
 token = None
 
 def closeSesisson():
-    keycloakOpenId.logout(token['refresh_token'])
-    quit()
+
+    if messagebox.askyesno('Wylogowywanie', 'Czy na pewno chcesz wyjść z programu?'):
+        keycloakOpenId.logout(token['refresh_token'])
+        quit()
+    else:
+        pass
 
 
 if __name__ == '__main__':
@@ -247,10 +253,11 @@ if __name__ == '__main__':
         login()
 
         app = App(viewActive=viewActiveRents,
-                viewHistory=viewHistoryRents,
-                addRent=newRent,
-                endRent=endRent,
-                editRent=editRent)
+                viewHistory=viewHistoryRents)
+        
+        app.newRentBtn.config(command=newRent)
+        app.endRentBtn.config(command=endRent)
+        app.activeTable.bind('<Double-Button-1>', editRent)
 
         app.window.protocol("WM_DELETE_WINDOW", closeSesisson)
 
