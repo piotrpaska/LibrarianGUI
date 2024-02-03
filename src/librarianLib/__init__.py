@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from PIL import Image, ImageTk
 
 
 class App():
@@ -12,7 +13,7 @@ class App():
 
         self.rentData = {}
 
-        self.columns = ('name', 'lastName', 'schoolClass', 'bookTitle', 'deposit', 'rentalDate', 'maxDate')
+        self.columns = {'Imię': 'name', 'Nazwisko': 'lastName', 'Klasa': 'schoolClass', 'Tytuł Książki': 'bookTitle'}
 
         ############################## STYLES #########################################
         ### TREE STYLE ###
@@ -67,27 +68,32 @@ class App():
         self.activeTreeLabel.grid(row=0, column=0, sticky=W, columnspan=2, pady=(0, 20))
 
         ### FILTER BY COMBOBOX ###
-        self.activeFilterBy = ttk.Combobox(self.activeFilterFrame, values=self.columns[0:5], state='readonly')
+        self.activeFilterBy = ttk.Combobox(self.activeFilterFrame, values=list(self.columns.keys()), state='readonly')
         self.activeFilterBy.grid(row=1, column=0, sticky=W, padx=(0, 7))
+        self.activeFilterBy.current(0)
         
-        ### FILTER BY ENTRY ###
-        self.activeFilter = Entry(self.activeFilterFrame)
-        self.activeFilter.grid(row=1, column=1, sticky=W, padx=(0, 7))
+        ### FILTER ENTRY ###
+        self.activeFilterEntry = Entry(self.activeFilterFrame)
+        self.activeFilterEntry.grid(row=1, column=1, sticky=W, padx=(0, 7))
 
         ### FILTER BUTTON ###
-        self.activeFilterBtn = Button(self.activeFilterFrame, text='Filtruj', height=1) # Assign command in main.py (filterActiveTable)
+        self.activeFilterBtn = Button(self.activeFilterFrame, text='Filtruj', height=1)  
         self.activeFilterBtn.grid(row=1, column=3, sticky=W)
         
+        ### CLEAR FILTER BUTTON ###
+        self.activeClearFilterBtn = Button(self.activeFilterFrame, text='Wyczyść', height=1)
+        self.activeClearFilterBtn.grid(row=1, column=4, sticky=W, padx=(5, 0))
+
         ### COMMANDS LABEL ###
         self.commandsLabel = Label(self.activeCommandsFrame, text='Komendy', font='Arial, 14')
         self.commandsLabel.grid(row=0, column=0, sticky=E, pady=(0, 20))
 
         ### NEW RENT BUTTON ###
-        self.newRentBtn = Button(self.activeCommandsFrame, text='Nowe wypożyczenie', width=20) # Assign command in main.py
+        self.newRentBtn = Button(self.activeCommandsFrame, text='Nowe wypożyczenie', width=20) 
         self.newRentBtn.grid(row=1, column=0, sticky=E, pady=(0, 10))
 
         ### END RENT BUTTON ###
-        self.endRentBtn = Button(self.activeCommandsFrame, text='Zakończ wypożyczenie', width=20) # Assign command in main.py
+        self.endRentBtn = Button(self.activeCommandsFrame, text='Zakończ wypożyczenie', width=20) 
         self.endRentBtn.grid(row=2, column=0, sticky=E, pady=(0, 10))
         
         ### ACTIVE TREE SCROLLBAR ###
@@ -127,29 +133,43 @@ class App():
         self.activeTable.pack(fill='both', expand="yes")
 
     def setupHistoryTable(self):
+        ### HISTORY TAB ###
         self.historyTab = Frame(self.rentsNotebook)
 
+        ### UI FRAME ###
         self.historyUIFrame = Frame(self.historyTab)
         self.historyUIFrame.pack(side=TOP, fill=X, pady=(0, 10))
 
+        ### FILTER FRAME ###
         self.historyFilterFrame = Frame(self.historyUIFrame)
         self.historyFilterFrame.pack(side=LEFT, fill=X, padx=20, pady=20)
 
+        ### TABLE LABEL ###
         self.historyLabel = Label(self.historyFilterFrame, text='Historia', font='Arial, 14')
         self.historyLabel.grid(row=0, column=0, sticky=W, columnspan=2, pady=(0, 20))
 
-        self.historyFilterBy = ttk.Combobox(self.historyFilterFrame, values=self.columns[0:5], state='readonly')
+        ### FILTER BY COMBOBOX ###
+        self.historyFilterBy = ttk.Combobox(self.historyFilterFrame, values=list(self.columns.keys()), state='readonly')
         self.historyFilterBy.grid(row=1, column=0, sticky=W, padx=(0, 7))
+        self.historyFilterBy.current(0)
 
-        self.historyFilter = Entry(self.historyFilterFrame)
-        self.historyFilter.grid(row=1, column=1, sticky=W, padx=(0, 7))
+        ### FILTER ENTRY ###
+        self.historyFilterEntry = Entry(self.historyFilterFrame)
+        self.historyFilterEntry.grid(row=1, column=1, sticky=W, padx=(0, 7))
 
-        self.historyFilterBtn = Button(self.historyFilterFrame, text='Filtruj', height=1) # Assign command in main.py (filterHistoryTable)
+        ### FILTER BUTTON ###
+        self.historyFilterBtn = Button(self.historyFilterFrame, text='Filtruj', height=1)
         self.historyFilterBtn.grid(row=1, column=3, sticky=W)
 
+        ### CLEAR FILTER BUTTON ###
+        self.historyClearFilterBtn = Button(self.historyFilterFrame, text='Wyczyść', height=1)
+        self.historyClearFilterBtn.grid(row=1, column=4, sticky=W, padx=(5, 0))
+
+        ### HISTORY TREE SCROLLBAR ###
         self.historyTreeScroll = Scrollbar(self.historyTab)
         self.historyTreeScroll.pack(side=RIGHT, fill=Y)
 
+        ############################## HISTORY TABLE #########################################
         self.historyTable = ttk.Treeview(self.historyTab, yscrollcommand=self.historyTreeScroll.set, selectmode='extended',
                                          columns=('name', 'lastName', 'schoolClass', 'bookTitle', 'rentalDate',
                                                   'maxDate', 'returnDate', 'deposit'),

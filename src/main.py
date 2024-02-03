@@ -192,6 +192,86 @@ def editRent(event=None):
     del editWindow
 
 
+def filterActiveRents():
+    global app
+    if functionDependentions(0) is False:
+        return
+
+    app.activeTable.delete(*app.activeTable.get_children())
+
+    searchPhrase = app.activeFilterEntry.get()
+    filterBy = app.columns[app.activeFilterBy.get()]
+    if searchPhrase == '':
+        messagebox.showerror('Błąd', 'Nie wpisano frazy do wyszukania')
+        viewActiveRents()
+        return
+    else:
+        count = 0
+        for rent in activeCollection.find():
+            if searchPhrase in rent[filterBy]:
+                # Counting overdue
+                maxDateSTR = rent['maxDate']
+                if maxDateSTR != '14:10':
+                    # jeśli kaucja jest wpłacona
+                    today = datetime.datetime.today().date()
+                    maxDate = datetime.datetime.strptime(maxDateSTR, dateFormat).date()
+                    if maxDate < today:
+                        difference = today - maxDate
+                        overdue = f'Kara: {difference.days}zł'
+                    else:
+                        overdue = f'Wypożyczona'
+                else:
+                    # jeśli kaucja nie została wpłacona
+                    today = datetime.datetime.today().date()
+                    rentalDate = datetime.datetime.strptime(rent['rentalDate'], dateFormat).date()
+                    if rentalDate < today:
+                        difference = today - rentalDate
+                        overdue = f'Kara: {difference.days}zł'
+                    else:
+                        overdue = f'Wypożyczona'
+
+                if count % 2 == 0:
+                    app.activeTable.insert(parent='', index=0,
+                                        values=(
+                                            rent['name'],
+                                            rent['lastName'],
+                                            rent['schoolClass'],
+                                            rent['bookTitle'],
+                                            rent['rentalDate'],
+                                            rent['maxDate'],
+                                            rent['deposit'],
+                                            overdue
+                                        ), iid=rent['_id'], tags=('evenrow',))
+                else:
+                    app.activeTable.insert(parent='', index=0,
+                                        values=(
+                                            rent['name'],
+                                            rent['lastName'],
+                                            rent['schoolClass'],
+                                            rent['bookTitle'],
+                                            rent['rentalDate'],
+                                            rent['maxDate'],
+                                            rent['deposit'],
+                                            overdue
+                                        ), iid=rent['_id'], tags=('oddrow',))
+                    
+                count += 1
+
+
+def clearFilter():
+    global app
+    if functionDependentions(0) is False:
+        return
+
+    tab = app.rentsNotebook.tab(app.rentsNotebook.select(), "text")
+    print(tab)
+    if tab == 'Wypożyczenia':
+        app.activeFilterEntry.delete(0, END)
+        viewActiveRents()
+    elif tab == 'Historia':
+        app.historyFilterEntry.delete(0, END)
+        viewActiveRents()
+
 def functionDependentions(roleLevel: int):
     global token
     global app
@@ -258,6 +338,8 @@ if __name__ == '__main__':
         app.newRentBtn.config(command=newRent)
         app.endRentBtn.config(command=endRent)
         app.activeTable.bind('<Double-Button-1>', editRent)
+        app.activeFilterBtn.config(command=filterActiveRents)
+        app.activeClearFilterBtn.config(command=clearFilter)
 
         app.window.protocol("WM_DELETE_WINDOW", closeSesisson)
 
