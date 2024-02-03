@@ -258,6 +258,50 @@ def filterActiveRents():
                 count += 1
 
 
+def filterHistoryRents():
+    global app
+    if functionDependentions(0) is False:
+        return
+
+    app.historyTable.delete(*app.historyTable.get_children())
+
+    searchPhrase = app.historyFilterEntry.get()
+    filterBy = app.columns[app.historyFilterBy.get()]
+    if searchPhrase == '':
+        messagebox.showerror('Błąd', 'Nie wpisano frazy do wyszukania')
+        viewHistoryRents()
+        return
+    else:
+        count = 0
+        for rent in historyCollection.find():
+            if searchPhrase in rent[filterBy]:
+                if count % 2 == 0:
+                    app.historyTable.insert(parent='', index=0,
+                                        values=(
+                                            rent['name'],
+                                            rent['lastName'],
+                                            rent['schoolClass'],
+                                            rent['bookTitle'],
+                                            rent['rentalDate'],
+                                            rent['maxDate'],
+                                            rent['returnDate'],
+                                            rent['deposit'],
+                                        ), iid=rent['_id'], tags=('evenrow',))
+                else:
+                    app.historyTable.insert(parent='', index=0,
+                                        values=(
+                                            rent['name'],
+                                            rent['lastName'],
+                                            rent['schoolClass'],
+                                            rent['bookTitle'],
+                                            rent['rentalDate'],
+                                            rent['maxDate'],
+                                            rent['returnDate'],
+                                            rent['deposit'],
+                                        ), iid=rent['_id'], tags=('oddrow',))
+
+                count += 1
+
 def clearFilter():
     global app
     if functionDependentions(0) is False:
@@ -270,7 +314,7 @@ def clearFilter():
         viewActiveRents()
     elif tab == 'Historia':
         app.historyFilterEntry.delete(0, END)
-        viewActiveRents()
+        viewHistoryRents()
 
 def functionDependentions(roleLevel: int):
     global token
@@ -340,6 +384,8 @@ if __name__ == '__main__':
         app.activeTable.bind('<Double-Button-1>', editRent)
         app.activeFilterBtn.config(command=filterActiveRents)
         app.activeClearFilterBtn.config(command=clearFilter)
+        app.historyFilterBtn.config(command=filterHistoryRents)
+        app.historyClearFilterBtn.config(command=clearFilter)
 
         app.window.protocol("WM_DELETE_WINDOW", closeSesisson)
 
