@@ -1,6 +1,7 @@
 from librarianLib import *
 from librarianLib.keycloakgui import *
 from librarianLib.keycloakfunc import KeycloakLib
+from tkinter import messagebox
 import pymongo
 import yaml
 import ctypes
@@ -379,13 +380,13 @@ if __name__ == '__main__':
         app = App(viewActive=viewActiveRents,
                 viewHistory=viewHistoryRents)
         
-        app.newRentBtn.config(command=newRent)
-        app.endRentBtn.config(command=endRent)
+        app.newRentBtn.configure(command=newRent)
+        app.endRentBtn.configure(command=endRent)
         app.activeTable.bind('<Double-Button-1>', editRent)
-        app.activeFilterBtn.config(command=filterActiveRents)
-        app.activeClearFilterBtn.config(command=clearFilter)
-        app.historyFilterBtn.config(command=filterHistoryRents)
-        app.historyClearFilterBtn.config(command=clearFilter)
+        app.activeFilterBtn.configure(command=filterActiveRents)
+        app.activeClearFilterBtn.configure(command=clearFilter)
+        app.historyFilterBtn.configure(command=filterHistoryRents)
+        app.historyClearFilterBtn.configure(command=clearFilter)
 
         app.window.protocol("WM_DELETE_WINDOW", closeSesisson)
 
