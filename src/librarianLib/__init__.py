@@ -4,6 +4,7 @@ from customtkinter import *
 import customtkinter
 from tkinter import ttk
 from PIL import Image, ImageTk
+from CTkTable import CTkTable
 
 
 class App():
@@ -18,8 +19,8 @@ class App():
 
         self.bg_color = self.window._apply_appearance_mode(customtkinter.ThemeManager.theme["CTkFrame"]["fg_color"])
         self.text_color = self.window._apply_appearance_mode(customtkinter.ThemeManager.theme["CTkLabel"]["text_color"])
-        self.btn_color = self.window._apply_appearance_mode(customtkinter.ThemeManager.theme["CTkButton"]["fg_color"])
-        print(self.bg_color, self.text_color, self.btn_color)
+        self.theme_color = self.window._apply_appearance_mode(customtkinter.ThemeManager.theme["CTkButton"]["fg_color"])
+        print(self.bg_color, self.text_color, self.theme_color)
         # gray17 #DCE4EE #1F6AA5
 
         self.columns = {'Imię': 'name', 'Nazwisko': 'lastName', 'Klasa': 'schoolClass', 'Tytuł Książki': 'bookTitle'}
@@ -34,7 +35,7 @@ class App():
 
             self.currentButton.configure(image=self.buttonImages[self.currentButton][0], fg_color='transparent', 
                                          text_color=self.text_color)
-            button.configure(image=self.buttonImages[button][1], fg_color='#eeeeee', text_color=self.btn_color)
+            button.configure(image=self.buttonImages[button][1], fg_color='#eeeeee', text_color=self.theme_color)
             self.currentButton = button
 
             if len(optionalFuncs) > 0:
@@ -42,7 +43,7 @@ class App():
                     func()
 
         ### MENU FRAME ###
-        self.sidebarFrame = CTkFrame(self.window, fg_color=self.btn_color, width=220)
+        self.sidebarFrame = CTkFrame(self.window, fg_color=self.theme_color, width=220)
         self.sidebarFrame.propagate(0)
         self.sidebarFrame.pack(side=LEFT, fill=Y, anchor=W)
 
@@ -63,6 +64,7 @@ class App():
                                     command=lambda: switchPage(self.activeTabFrame, self.rentsTabBtn, viewActive), 
                                     image=rentsIconOff, compound=LEFT,
                                     font=('Arial Bold', 14), border_color="#3995DC", border_width=2, anchor=W, width=140)
+        self.rentsTabBtn.pack_propagate(0)
         self.rentsTabBtn.pack(pady=(0, 10), padx=20, ipady=5)
 
         ### HISTORY TAB SWITCH ###
@@ -75,6 +77,7 @@ class App():
                                        fg_color='transparent', hover_color='#14486F',image=historyIconOff, 
                                        compound=LEFT, font=('Arial Bold', 14), border_color="#3995DC", 
                                        border_width=2, anchor=W, width=140)
+        self.historyTabBtn.pack_propagate(0)
         self.historyTabBtn.pack(pady=(0, 10), padx=20, ipady=5)
 
         self.buttonImages = {
@@ -87,24 +90,16 @@ class App():
         self.currentPage = self.activeTabFrame
         self.currentButton = self.rentsTabBtn
         self.activeTabFrame.pack(fill=BOTH, expand=True, side=RIGHT)
-        self.rentsTabBtn.configure(image=rentsIconOn, fg_color='#eeeeee', text_color=self.btn_color)
+        self.rentsTabBtn.configure(image=rentsIconOn, fg_color='#eeeeee', text_color=self.theme_color)
 
     ############################## ACTIVE TAB SETUP #########################################
     def setupActiveTab(self):
 
         self.activeTabFrame = CTkFrame(self.window, bg_color=self.bg_color)
 
-        ### UI FRAME ###
-        self.activeUIFrame = CTkFrame(self.activeTabFrame)
-        self.activeUIFrame.pack(fill=X, pady=(0, 10))
-
         ### FILTER FRAME ###
-        self.activeFilterFrame = CTkFrame(self.activeUIFrame, fg_color='transparent')
-        self.activeFilterFrame.pack(side=LEFT, fill=BOTH, padx=15, pady=10)
-
-        ### COMMANDS FRAME ###
-        self.activeCommandsFrame = CTkFrame(self.activeUIFrame, fg_color='transparent')
-        self.activeCommandsFrame.pack(side=RIGHT, fill=BOTH, padx=15, pady=10)
+        self.activeFilterFrame = CTkFrame(self.activeTabFrame, fg_color='transparent')
+        self.activeFilterFrame.pack(side=TOP, fill=X, padx=15, pady=10)
 
         ### ACTIVE LABEL ###
         self.activeTreeLabel = CTkLabel(self.activeFilterFrame, text='Aktywne wypożyczenia', font=('Arial', 16))
@@ -126,67 +121,27 @@ class App():
         ### CLEAR FILTER BUTTON ###
         self.activeClearFilterBtn = CTkButton(self.activeFilterFrame, text='Wyczyść', height=1)
         self.activeClearFilterBtn.grid(row=1, column=4, sticky=W, padx=(5, 20), pady=(0, 20))
-
-        ### COMMANDS LABEL ###
-        self.commandsLabel = CTkLabel(self.activeCommandsFrame, text='Komendy', font=('Arial', 16))
-        self.commandsLabel.pack(side=TOP, fill=X, padx=10, pady=(10, 8))
-
-        ### NEW RENT BUTTON ###
-        self.newRentBtn = CTkButton(self.activeCommandsFrame, text='Nowe wypożyczenie', width=20) 
-        self.newRentBtn.pack(side=TOP, fill=X, padx=10, pady=(0, 8))
-
-        ### END RENT BUTTON ###
-        self.endRentBtn = CTkButton(self.activeCommandsFrame, text='Zakończ wypożyczenie', width=20) 
-        self.endRentBtn.pack(side=TOP, fill=X, padx=10, pady=(0, 10)) 
         
-        ### ACTIVE TREE SCROLLBAR ###
-        self.activeTreeScroll = CTkScrollbar(self.activeTabFrame)
-        self.activeTreeScroll.pack(side=RIGHT, fill=Y)
+        ### ACTIVE TREE SCROLL FRAME ###
+        self.activeTreeScrollFrame = CTkFrame(self.activeTabFrame, fg_color='transparent')
+        self.activeTreeScrollFrame.pack(side=BOTTOM, fill=BOTH, expand=True, padx=5, pady=5)
 
-        ### ACTIVE TABLE ###
-        self.activeTable = ttk.Treeview(self.activeTabFrame, yscrollcommand=self.activeTreeScroll.set, selectmode='extended',
-                                        columns=('name', 'lastName', 'schoolClass', 'bookTitle', 'rentalDate',
-                                                 'maxDate', 'deposit', 'state'),
-                                        show='headings')
-
-        self.activeTable.heading('name', text='Imię', anchor=W)
-        self.activeTable.heading('lastName', text='Nazwisko', anchor=W)
-        self.activeTable.heading('schoolClass', text='Klasa', anchor=CENTER)
-        self.activeTable.heading('bookTitle', text='Tytuł książki', anchor=CENTER)
-        self.activeTable.heading('rentalDate', text='Data wypożyczenia', anchor=CENTER)
-        self.activeTable.heading('maxDate', text='Data do zwrotu', anchor=CENTER)
-        self.activeTable.heading('deposit', text='Kaucja', anchor=CENTER)
-        self.activeTable.heading('state', text='Status', anchor=CENTER)
-
-        self.activeTable.column("#0", width=0, stretch=NO)
-        self.activeTable.column('name', anchor=W, width=200)
-        self.activeTable.column('lastName', anchor=W, width=200)
-        self.activeTable.column('schoolClass', anchor=CENTER, width=110)
-        self.activeTable.column('bookTitle', anchor=CENTER, width=350)
-        self.activeTable.column('rentalDate', anchor=CENTER, width=200)
-        self.activeTable.column('maxDate', anchor=CENTER, width=200)
-        self.activeTable.column('deposit', anchor=CENTER, width=100)
-        self.activeTable.column('state', anchor=CENTER, width=150)
-
-        self.activeTable.tag_configure('oddrow', background='white')
-        self.activeTable.tag_configure('evenrow', background='lightblue')
-
-        self.activeTreeScroll.configure(command=self.activeTable.yview)
-
-        self.activeTable.pack(fill='both', expand="yes")
+        columns = ['Imię', 'Nazwisko', 'Klasa', 'Tytuł książki', 'Data wypożyczenia', 'Data do zwrotu', 'Kaucja', 'Status']
+        
+        self.rentsTable = CTkTable(self.activeTreeScrollFrame, header_color=self.theme_color, 
+                                   hover_color='#595959', font=('Arial', 12), column=8)
+        self.rentsTable.add_row(index=0, values=columns)
+        self.rentsTable.edit_row(0, text_color=self.text_color, hover_color='#14486F')
+        self.rentsTable.pack(fill=X, expand=True, side=TOP, pady=5, anchor=N)
 
     ############################## HISTORY TAB SETUP ########################################
     def setupHistoryTab(self):
 
         self.historyTabFrame = CTkFrame(self.window, bg_color=self.bg_color)
 
-        ### UI FRAME ###
-        self.historyUIFrame = CTkFrame(self.historyTabFrame)
-        self.historyUIFrame.pack(side=TOP, fill=X, pady=(0, 10))
-
         ### FILTER FRAME ###
-        self.historyFilterFrame = CTkFrame(self.historyUIFrame, fg_color='transparent')
-        self.historyFilterFrame.pack(side=LEFT, fill=X, padx=20, pady=20)
+        self.historyFilterFrame = CTkFrame(self.historyTabFrame)
+        self.historyFilterFrame.pack(side=TOP, fill=X, padx=20, pady=20)
 
         ### TABLE LABEL ###
         self.historyLabel = CTkLabel(self.historyFilterFrame, text='Historia', font=('Arial', 16))
@@ -209,45 +164,19 @@ class App():
         self.historyClearFilterBtn = CTkButton(self.historyFilterFrame, text='Wyczyść', height=1)
         self.historyClearFilterBtn.grid(row=1, column=4, sticky=W, padx=(5, 0))
 
-        ### HISTORY TREE SCROLLBAR ###
-        self.historyTreeScroll = CTkScrollbar(self.historyTabFrame)
-        self.historyTreeScroll.pack(side=RIGHT, fill=Y)
+        ### HISTORY TABLE SCROLL FRAME ###
+        self.historyTreeScrollFrame = CTkScrollableFrame(self.historyTabFrame, fg_color='transparent')
+        self.historyTreeScrollFrame.pack(side=BOTTOM, fill=BOTH, expand=True, padx=5, pady=5)
+
+        columns = ['Imię', 'Nazwisko', 'Klasa', 'Tytuł książki', 'Data wypożyczenia', 'Data do zwrotu', 'Data zwrotu', 'Kaucja']
 
         ### HISTORY TABLE ###
-        self.historyTable = ttk.Treeview(self.historyTabFrame, yscrollcommand=self.historyTreeScroll.set, selectmode='extended',
-                                         columns=('name', 'lastName', 'schoolClass', 'bookTitle', 'rentalDate',
-                                                  'maxDate', 'returnDate', 'deposit'),
-                                         show='headings')
-
-        self.historyTable.heading('name', text='Imię', anchor=W)
-        self.historyTable.heading('lastName', text='Nazwisko', anchor=W)
-        self.historyTable.heading('schoolClass', text='Klasa', anchor=CENTER)
-        self.historyTable.heading('bookTitle', text='Tytuł książki', anchor=CENTER)
-        self.historyTable.heading('rentalDate', text='Data wypożyczenia', anchor=CENTER)
-        self.historyTable.heading('maxDate', text='Data do zwrotu', anchor=CENTER)
-        self.historyTable.heading('returnDate', text='Data zwrotu', anchor=CENTER)
-        self.historyTable.heading('deposit', text='Kaucja', anchor=CENTER)
-
-        self.historyTable.column("#0", width=0, stretch=NO)
-        self.historyTable.column('name', anchor=W, width=200)
-        self.historyTable.column('lastName', anchor=W, width=200)
-        self.historyTable.column('schoolClass', anchor=CENTER, width=110)
-        self.historyTable.column('bookTitle', anchor=CENTER, width=350)
-        self.historyTable.column('rentalDate', anchor=CENTER, width=200)
-        self.historyTable.column('maxDate', anchor=CENTER, width=200)
-        self.historyTable.column('returnDate', anchor=CENTER, width=200)
-        self.historyTable.column('deposit', anchor=CENTER, width=100)
-
-        self.historyTable.tag_configure('oddrow', background='white')
-        self.historyTable.tag_configure('evenrow', background='lightblue')
-
-        self.historyTreeScroll.configure(command=self.historyTable.yview)
-
-        self.historyTable.pack(fill='both', expand="yes")
-
-        
-
-
+        self.historyTable = CTkTable(self.historyTreeScrollFrame, header_color=self.theme_color, 
+                                    hover_color='#595959', font=('Arial', 12), column=8)
+        self.historyTable.add_row(index=0, values=columns)
+        self.historyTable.edit_row(0, text_color=self.text_color, hover_color='#14486F')
+        self.historyTable.pack(fill=X, expand=True, side=TOP, pady=5, anchor=N)
+    
 class AddRentWindow():
 
     def __init__(self, root: CTk):

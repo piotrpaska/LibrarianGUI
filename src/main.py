@@ -37,14 +37,14 @@ def viewActiveRents():
     if functionDependentions(0) is False:
         return
 
-    app.activeTable.delete(*app.activeTable.get_children())
+    while len(app.rentsTable.get()) > 1:
+        app.rentsTable.delete_row(1)
 
-    count = 0
     for rent in activeCollection.find():
-        # Counting overdue
+        ### Counting overdue ###
         maxDateSTR = rent['maxDate']
         if maxDateSTR != '14:10':
-            # jeśli kaucja jest wpłacona
+            ## If deposit is paid
             today = datetime.datetime.today().date()
             maxDate = datetime.datetime.strptime(maxDateSTR, dateFormat).date()
             if maxDate < today:
@@ -53,7 +53,7 @@ def viewActiveRents():
             else:
                 overdue = f'Wypożyczona'
         else:
-            # jeśli kaucja nie została wpłacona
+            ## If deposit is not paid
             today = datetime.datetime.today().date()
             rentalDate = datetime.datetime.strptime(rent['rentalDate'], dateFormat).date()
             if rentalDate < today:
@@ -62,32 +62,15 @@ def viewActiveRents():
             else:
                 overdue = f'Wypożyczona'
 
-        if count % 2 == 0:
-            app.activeTable.insert(parent='', index=0,
-                                   values=(
-                                       rent['name'],
-                                       rent['lastName'],
-                                       rent['schoolClass'],
-                                       rent['bookTitle'],
-                                       rent['rentalDate'],
-                                       rent['maxDate'],
-                                       rent['deposit'],
-                                       overdue
-                                   ), iid=rent['_id'], tags=('evenrow',))
-        else:
-            app.activeTable.insert(parent='', index=0,
-                                   values=(
-                                       rent['name'],
-                                       rent['lastName'],
-                                       rent['schoolClass'],
-                                       rent['bookTitle'],
-                                       rent['rentalDate'],
-                                       rent['maxDate'],
-                                       rent['deposit'],
-                                       overdue
-                                   ), iid=rent['_id'], tags=('oddrow',))
-
-        count += 1
+        app.rentsTable.add_row(index=1, 
+                               values=[rent['name'], 
+                               rent['lastName'], 
+                               rent['schoolClass'], 
+                               rent['bookTitle'], 
+                               rent['rentalDate'], 
+                               rent['maxDate'], 
+                               rent['deposit'], 
+                               overdue])
 
 
 def viewHistoryRents():
@@ -95,36 +78,20 @@ def viewHistoryRents():
     if functionDependentions(0) is False:
         return
 
-    app.historyTable.delete(*app.historyTable.get_children())
+    while len(app.historyTable.get()) > 1:
+        app.historyTable.delete_row(1)
 
-    count = 0
     for rent in historyCollection.find():
-        if count % 2 == 0:
-            app.historyTable.insert(parent='', index=0,
-                                    values=(
-                                        rent['name'],
-                                        rent['lastName'],
-                                        rent['schoolClass'],
-                                        rent['bookTitle'],
-                                        rent['rentalDate'],
-                                        rent['maxDate'],
-                                        rent['returnDate'],
-                                        rent['deposit'],
-                                    ), iid=rent['_id'], tags=('evenrow',))
-        else:
-            app.historyTable.insert(parent='', index=0,
-                                    values=(
-                                        rent['name'],
-                                        rent['lastName'],
-                                        rent['schoolClass'],
-                                        rent['bookTitle'],
-                                        rent['rentalDate'],
-                                        rent['maxDate'],
-                                        rent['returnDate'],
-                                        rent['deposit'],
-                                    ), iid=rent['_id'], tags=('oddrow',))
-
-        count += 1
+        
+        app.historyTable.add_row(index=1, 
+                                 values=[rent['name'], 
+                                 rent['lastName'], 
+                                 rent['schoolClass'], 
+                                 rent['bookTitle'], 
+                                 rent['rentalDate'], 
+                                 rent['maxDate'], 
+                                 rent['returnDate'], 
+                                 rent['deposit']])
 
 
 def newRent():
@@ -380,15 +347,15 @@ if __name__ == '__main__':
         app = App(viewActive=viewActiveRents,
                 viewHistory=viewHistoryRents)
         
-        app.newRentBtn.configure(command=newRent)
-        app.endRentBtn.configure(command=endRent)
-        app.activeTable.bind('<Double-Button-1>', editRent)
+        #app.newRentBtn.configure(command=newRent)
+        #app.endRentBtn.configure(command=endRent)
+        #app.activeTable.bind('<Double-Button-1>', editRent)
         app.activeFilterBtn.configure(command=filterActiveRents)
         app.activeClearFilterBtn.configure(command=clearFilter)
         app.historyFilterBtn.configure(command=filterHistoryRents)
         app.historyClearFilterBtn.configure(command=clearFilter)
 
         app.window.protocol("WM_DELETE_WINDOW", closeSesisson)
-
+        
         viewActiveRents()
         app.window.mainloop()
