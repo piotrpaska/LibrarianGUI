@@ -97,33 +97,51 @@ class App():
 
         self.activeTabFrame = CTkFrame(self.window, bg_color=self.bg_color)
 
-        ### FILTER FRAME ###
-        self.activeFilterFrame = CTkFrame(self.activeTabFrame, fg_color='transparent')
-        self.activeFilterFrame.pack(side=TOP, fill=X, padx=15, pady=10)
+        ### ACTIVE UPPER FRAME ###
+        self.activeUpperFrame = CTkFrame(self.activeTabFrame, fg_color='transparent')
+        self.activeUpperFrame.pack(side=TOP, fill=X, padx=25, pady=20)
 
         ### ACTIVE LABEL ###
-        self.activeTreeLabel = CTkLabel(self.activeFilterFrame, text='Aktywne wypożyczenia', font=('Arial', 16))
-        self.activeTreeLabel.grid(row=0, column=0, sticky=W, columnspan=2, padx=10, pady=(20, 8))
+        self.activeTreeLabel = CTkLabel(self.activeUpperFrame, text='Aktywne wypożyczenia', font=('Arial Bold', 18), 
+                                        text_color=self.text_color)
+        self.activeTreeLabel.pack(side=LEFT, fill=X, anchor=W)
+
+        ### ADD RENT BUTTON ###
+        self.addRentBtn = CTkButton(self.activeUpperFrame, text='Dodaj wypożyczenie')
+        self.addRentBtn.pack(side=RIGHT, fill=X, anchor=E)
+
+        ### FILTER FRAME ###
+        self.activeFilterFrame = CTkFrame(self.activeTabFrame, corner_radius=16)
+        self.activeFilterFrame.pack(side=TOP, fill=X, padx=10, pady=10)
 
         ### FILTER BY COMBOBOX ###
         self.activeFilterBy = CTkOptionMenu(self.activeFilterFrame, values=list(self.columns.keys()), state='readonly')
-        self.activeFilterBy.grid(row=1, column=0, sticky=W, padx=(10, 7), pady=(0, 20))
+        self.activeFilterBy.grid(row=0, column=0, sticky=EW, padx=(20, 7), pady=20)
         self.activeFilterBy.set(list(self.columns.keys())[0])
         
         ### FILTER ENTRY ###
-        self.activeFilterEntry = CTkEntry(self.activeFilterFrame, width=200)
-        self.activeFilterEntry.grid(row=1, column=1, sticky=W, padx=(0, 7), pady=(0, 20))
+        self.activeFilterEntry = CTkEntry(self.activeFilterFrame, width=1000)
+        self.activeFilterEntry.grid(row=0, column=1, sticky=EW, padx=(0, 7), pady=20)
+        self.activeFilterFrame.columnconfigure(1, weight=1)
 
         ### FILTER BUTTON ###
-        self.activeFilterBtn = CTkButton(self.activeFilterFrame, text='Filtruj', height=1, width=4)  
-        self.activeFilterBtn.grid(row=1, column=3, sticky=W, pady=(0, 20))
+        filterImg = Image.open('assets/search-dark.png')
+        filterImg = CTkImage(filterImg, filterImg, (20, 20))
+
+        self.activeFilterBtn = CTkButton(self.activeFilterFrame, text='', height=30, width=30, 
+                                         image=filterImg, compound=TOP)  
+        self.activeFilterBtn.grid(row=0, column=3, sticky=EW, pady=20)
         
         ### CLEAR FILTER BUTTON ###
-        self.activeClearFilterBtn = CTkButton(self.activeFilterFrame, text='Wyczyść', height=1)
-        self.activeClearFilterBtn.grid(row=1, column=4, sticky=W, padx=(5, 20), pady=(0, 20))
+        clearImg = Image.open('assets/clear-dark.png')
+        clearImg = CTkImage(clearImg, clearImg, (20, 20))
+
+        self.activeClearFilterBtn = CTkButton(self.activeFilterFrame, text='', height=30, width=30, 
+                                              image=clearImg, compound=TOP)
+        self.activeClearFilterBtn.grid(row=0, column=4, sticky=EW, padx=(5, 20), pady=20)
         
         ### ACTIVE TREE SCROLL FRAME ###
-        self.activeTreeScrollFrame = CTkFrame(self.activeTabFrame, fg_color='transparent')
+        self.activeTreeScrollFrame = CTkScrollableFrame(self.activeTabFrame, fg_color='transparent')
         self.activeTreeScrollFrame.pack(side=BOTTOM, fill=BOTH, expand=True, padx=5, pady=5)
 
         columns = ['Imię', 'Nazwisko', 'Klasa', 'Tytuł książki', 'Data wypożyczenia', 'Data do zwrotu', 'Kaucja', 'Status']
@@ -139,30 +157,41 @@ class App():
 
         self.historyTabFrame = CTkFrame(self.window, bg_color=self.bg_color)
 
-        ### FILTER FRAME ###
-        self.historyFilterFrame = CTkFrame(self.historyTabFrame)
-        self.historyFilterFrame.pack(side=TOP, fill=X, padx=20, pady=20)
+        ### HISTORY UPPER FRAME ###
+        self.historyUpperFrame = CTkFrame(self.historyTabFrame, fg_color='transparent')
+        self.historyUpperFrame.pack(side=TOP, fill=X, padx=25, pady=20)
 
         ### TABLE LABEL ###
-        self.historyLabel = CTkLabel(self.historyFilterFrame, text='Historia', font=('Arial', 16))
-        self.historyLabel.grid(row=0, column=0, sticky=W, columnspan=2, pady=(0, 20))
+        self.historyLabel = CTkLabel(self.historyUpperFrame, text='Historia', font=('Arial Bold', 18))
+        self.historyLabel.pack(side=LEFT, fill=X, anchor=W)
+
+        ### FILTER FRAME ###
+        self.historyFilterFrame = CTkFrame(self.historyTabFrame, corner_radius=16)
+        self.historyFilterFrame.pack(side=TOP, fill=X, padx=20, pady=20)
 
         ### FILTER BY COMBOBOX ###
         self.historyFilterBy = CTkOptionMenu(self.historyFilterFrame, values=list(self.columns.keys()), state='readonly')
-        self.historyFilterBy.grid(row=1, column=0, sticky=W, padx=(0, 7))
+        self.historyFilterBy.grid(row=0, column=0, sticky=EW, padx=(20, 7), pady=20)
         self.historyFilterBy.set(list(self.columns.keys())[0])
 
         ### FILTER ENTRY ###
         self.historyFilterEntry = CTkEntry(self.historyFilterFrame)
-        self.historyFilterEntry.grid(row=1, column=1, sticky=W, padx=(0, 7))
+        self.historyFilterEntry.grid(row=0, column=1, sticky=EW, padx=(0, 7), pady=20)
+        self.historyFilterFrame.columnconfigure(1, weight=1)
 
         ### FILTER BUTTON ###
-        self.historyFilterBtn = CTkButton(self.historyFilterFrame, text='Filtruj', height=1)
-        self.historyFilterBtn.grid(row=1, column=3, sticky=W)
+        filterImg = Image.open('assets/search-dark.png')
+        filterImg = CTkImage(filterImg, filterImg, (20, 20))
+
+        self.historyFilterBtn = CTkButton(self.historyFilterFrame, text='', height=30, width=30, image=filterImg, compound=TOP)
+        self.historyFilterBtn.grid(row=0, column=2, sticky=EW, pady=20)
 
         ### CLEAR FILTER BUTTON ###
-        self.historyClearFilterBtn = CTkButton(self.historyFilterFrame, text='Wyczyść', height=1)
-        self.historyClearFilterBtn.grid(row=1, column=4, sticky=W, padx=(5, 0))
+        clearImg = Image.open('assets/clear-dark.png')
+        clearImg = CTkImage(clearImg, clearImg, (20, 20))
+
+        self.historyClearFilterBtn = CTkButton(self.historyFilterFrame, text='', height=30, width=30, image=clearImg, compound=TOP)
+        self.historyClearFilterBtn.grid(row=0, column=3, sticky=EW, padx=(5, 20), pady=20)
 
         ### HISTORY TABLE SCROLL FRAME ###
         self.historyTreeScrollFrame = CTkScrollableFrame(self.historyTabFrame, fg_color='transparent')

@@ -7,6 +7,7 @@ import yaml
 import ctypes
 import datetime
 from bson.objectid import ObjectId
+import time
 
 # Fixing blurry text on Windows
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -39,8 +40,12 @@ def viewActiveRents():
 
     while len(app.rentsTable.get()) > 1:
         app.rentsTable.delete_row(1)
-
-    for rent in activeCollection.find():
+    
+    startTime = time.time()
+    rents = activeCollection.find()
+    print(f'Active rents fetched in {(time.time() - startTime)*1000} ms')
+    startTime = time.time()
+    for rent in rents:
         ### Counting overdue ###
         maxDateSTR = rent['maxDate']
         if maxDateSTR != '14:10':
@@ -71,6 +76,7 @@ def viewActiveRents():
                                rent['maxDate'], 
                                rent['deposit'], 
                                overdue])
+    print(f'Active rents displayed in {(time.time() - startTime)*1000} ms')
 
 
 def viewHistoryRents():
@@ -165,7 +171,8 @@ def filterActiveRents():
     if functionDependentions(0) is False:
         return
 
-    app.activeTable.delete(*app.activeTable.get_children())
+    while len(app.rentsTable.get()) > 1:
+        app.rentsTable.delete_row(1)
 
     searchPhrase = app.activeFilterEntry.get()
     filterBy = app.columns[app.activeFilterBy.get()]
@@ -174,56 +181,37 @@ def filterActiveRents():
         viewActiveRents()
         return
     else:
-        count = 0
-        for rent in activeCollection.find():
-            if searchPhrase in rent[filterBy]:
-                # Counting overdue
-                maxDateSTR = rent['maxDate']
-                if maxDateSTR != '14:10':
-                    # jeśli kaucja jest wpłacona
-                    today = datetime.datetime.today().date()
-                    maxDate = datetime.datetime.strptime(maxDateSTR, dateFormat).date()
-                    if maxDate < today:
-                        difference = today - maxDate
-                        overdue = f'Kara: {difference.days}zł'
-                    else:
-                        overdue = f'Wypożyczona'
+        for rent in activeCollection.find({filterBy: { '$regex': searchPhrase, '$options' :'i' }}):
+            # Counting overdue
+            maxDateSTR = rent['maxDate']
+            if maxDateSTR != '14:10':
+                # jeśli kaucja jest wpłacona
+                today = datetime.datetime.today().date()
+                maxDate = datetime.datetime.strptime(maxDateSTR, dateFormat).date()
+                if maxDate < today:
+                    difference = today - maxDate
+                    overdue = f'Kara: {difference.days}zł'
                 else:
-                    # jeśli kaucja nie została wpłacona
-                    today = datetime.datetime.today().date()
-                    rentalDate = datetime.datetime.strptime(rent['rentalDate'], dateFormat).date()
-                    if rentalDate < today:
-                        difference = today - rentalDate
-                        overdue = f'Kara: {difference.days}zł'
-                    else:
-                        overdue = f'Wypożyczona'
+                    overdue = f'Wypożyczona'
+            else:
+                # jeśli kaucja nie została wpłacona
+                today = datetime.datetime.today().date()
+                rentalDate = datetime.datetime.strptime(rent['rentalDate'], dateFormat).date()
+                if rentalDate < today:
+                    difference = today - rentalDate
+                    overdue = f'Kara: {difference.days}zł'
+                else:
+                    overdue = f'Wypożyczona'
 
-                if count % 2 == 0:
-                    app.activeTable.insert(parent='', index=0,
-                                        values=(
-                                            rent['name'],
-                                            rent['lastName'],
-                                            rent['schoolClass'],
-                                            rent['bookTitle'],
-                                            rent['rentalDate'],
-                                            rent['maxDate'],
-                                            rent['deposit'],
-                                            overdue
-                                        ), iid=rent['_id'], tags=('evenrow',))
-                else:
-                    app.activeTable.insert(parent='', index=0,
-                                        values=(
-                                            rent['name'],
-                                            rent['lastName'],
-                                            rent['schoolClass'],
-                                            rent['bookTitle'],
-                                            rent['rentalDate'],
-                                            rent['maxDate'],
-                                            rent['deposit'],
-                                            overdue
-                                        ), iid=rent['_id'], tags=('oddrow',))
-                    
-                count += 1
+            app.rentsTable.add_row(index=1, 
+                                    values=[rent['name'], 
+                                    rent['lastName'], 
+                                    rent['schoolClass'], 
+                                    rent['bookTitle'], 
+                                    rent['rentalDate'], 
+                                    rent['maxDate'], 
+                                    rent['deposit'], 
+                                    overdue])
 
 
 def filterHistoryRents():
@@ -240,51 +228,34 @@ def filterHistoryRents():
         viewHistoryRents()
         return
     else:
-        count = 0
-        for rent in historyCollection.find():
-            if searchPhrase in rent[filterBy]:
-                if count % 2 == 0:
-                    app.historyTable.insert(parent='', index=0,
-                                        values=(
-                                            rent['name'],
-                                            rent['lastName'],
-                                            rent['schoolClass'],
-                                            rent['bookTitle'],
-                                            rent['rentalDate'],
-                                            rent['maxDate'],
-                                            rent['returnDate'],
-                                            rent['deposit'],
-                                        ), iid=rent['_id'], tags=('evenrow',))
-                else:
-                    app.historyTable.insert(parent='', index=0,
-                                        values=(
-                                            rent['name'],
-                                            rent['lastName'],
-                                            rent['schoolClass'],
-                                            rent['bookTitle'],
-                                            rent['rentalDate'],
-                                            rent['maxDate'],
-                                            rent['returnDate'],
-                                            rent['deposit'],
-                                        ), iid=rent['_id'], tags=('oddrow',))
+        for rent in historyCollection.find({filterBy: { '$regex': searchPhrase, '$options' :'i' }}):
+            app.historyTable.add_row(index=1, 
+                                     values=[rent['name'], 
+                                     rent['lastName'], 
+                                     rent['schoolClass'], 
+                                     rent['bookTitle'], 
+                                     rent['rentalDate'], 
+                                     rent['maxDate'], 
+                                     rent['returnDate'], 
+                                     rent['deposit']])
 
-                count += 1
 
 def clearFilter():
     global app
     if functionDependentions(0) is False:
         return
-
-    tab = app.rentsNotebook.tab(app.rentsNotebook.select(), "text")
-    print(tab)
-    if tab == 'Wypożyczenia':
+    
+    tab = app.currentPage
+    if tab == app.activeTabFrame:
         app.activeFilterEntry.delete(0, END)
         viewActiveRents()
-    elif tab == 'Historia':
+    elif tab == app.historyTabFrame:
         app.historyFilterEntry.delete(0, END)
         viewHistoryRents()
 
 def functionDependentions(roleLevel: int):
+    startTime = time.time()
+    print('Checking role...')
     global token
     global app
     global username
@@ -295,6 +266,7 @@ def functionDependentions(roleLevel: int):
     else:
         if keycloakLib.checkRole(username, roleLevel) is True:
             token = keycloakOpenId.refresh_token(token['refresh_token'])
+            print(f'Role checked in {(time.time() - startTime)*1000} ms')
         else:
             messagebox.showerror('Błąd', 'Nie masz uprawnień do tej czynności')
             return False
